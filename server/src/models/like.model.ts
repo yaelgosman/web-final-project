@@ -1,16 +1,16 @@
 import { Schema, model, Document, Types } from "mongoose";
 
 export interface ILike extends Document {
-  reviewId: Types.ObjectId;
+  postId: Types.ObjectId;
   userId: Types.ObjectId;
   createdAt: Date;
 }
 
 const likeSchema = new Schema<ILike>(
   {
-    reviewId: {
+    postId: {
       type: Schema.Types.ObjectId,
-      ref: "Review",
+      ref: "Post",
       required: true,
     },
     userId: {
@@ -25,6 +25,6 @@ const likeSchema = new Schema<ILike>(
 );
 
 // prevent duplicate likes
-likeSchema.index({ reviewId: 1, userId: 1 }, { unique: true });
+likeSchema.index({ postId: 1, userId: 1 }, { unique: true });
 
 export default model<ILike>("Like", likeSchema);
