@@ -3,6 +3,7 @@ import { Container, Stack, Box, Typography, CircularProgress } from '@mui/materi
 import Post from '../components/posts';
 import type { PostType } from '../types/post';
 import Navbar from '../components/Navbar';
+import { CATEGORIES } from '../constants/categories';
 
 // --- Mock Data Service (Simulating an API fetch) ---
 const fetchPosts = (): Promise<PostType[]> => {
@@ -57,6 +58,14 @@ const PostPage: React.FC = () => {
   const [posts, setPosts] = useState<PostType[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // State for the filter. Default to the first category.
+  const [selectedCategory, setSelectedCategory] = useState<string>(CATEGORIES[0].id);
+
+  const handleSelectedCategory = (id: string) => {
+    setSelectedCategory(id);
+    console.log('Changed category!');
+  }
+
   useEffect(() => {
     // Fetch data on component mount
     const loadPosts = async () => {
@@ -72,6 +81,11 @@ const PostPage: React.FC = () => {
     loadPosts();
   }, []);
 
+  // const displayPosts = posts.filter(post => {
+  //     // Example: return post.category === selectedCategory
+  //     return true; 
+  // });
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
@@ -83,7 +97,10 @@ const PostPage: React.FC = () => {
   return (
     <Box>
         <Box sx={{ position: 'sticky', top: 0, zIndex: 1100, bgcolor: 'white' }}>
-            <Navbar />
+            <Navbar
+              selectedCategory={selectedCategory} 
+              onSelectCategory={handleSelectedCategory} 
+            />
         </Box>
 
         <Container maxWidth="lg" sx={{ mt: 2, mb: 8 }}>
