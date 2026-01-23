@@ -113,9 +113,9 @@ const Post: React.FC<PostProps> = ({ post }) => {
 
               <Typography variant="body1" sx={{ mt: 3, mb: 3, color: '#444', lineHeight: 1.6 }}>
                 "{post.text}"
-                <Box component="span" sx={{ fontWeight: 'bold', cursor: 'pointer', ml: 1, textDecoration: 'underline' }}>
+                {/* <Box component="span" sx={{ fontWeight: 'bold', cursor: 'pointer', ml: 1, textDecoration: 'underline' }}>
                   Read more
-                </Box>
+                </Box> */}
               </Typography>
 
               <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>

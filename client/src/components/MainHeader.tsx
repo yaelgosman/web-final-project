@@ -15,8 +15,15 @@ import EditIcon from '@mui/icons-material/Edit'; // For "Review"
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import CookingReviewLogo from './CookingLogo';
+import { Link, useNavigate } from 'react-router-dom';
 
 const MainHeader: React.FC = () => {
+    const navigate = useNavigate(); // Hook for navigation
+  
+  const handleSignIn = () => {
+    navigate("/Login");
+  }
+
   return (
     <AppBar position="static" color="inherit" elevation={1} sx={{ borderBottom: '1px solid #e0e0e0' }}>
       <Container maxWidth="xl">
@@ -73,6 +80,7 @@ const MainHeader: React.FC = () => {
                 px: 3,
                 '&:hover': { bgcolor: '#333' }
               }}
+              onClick={handleSignIn}
             >
               Sign in
             </Button>
