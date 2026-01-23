@@ -1,8 +1,11 @@
 import { Schema, model, Document, Types } from "mongoose";
 
-export interface IReview extends Document {
+export interface IPost extends Document {
   userId: Types.ObjectId;
-  restaurantId: Types.ObjectId;
+  restaurant: {
+    name: string;
+    city: string;
+  };
   rating: number;
   text: string;
   imagePath?: string;
@@ -10,36 +13,24 @@ export interface IReview extends Document {
   updatedAt: Date;
 }
 
-const reviewSchema = new Schema<IReview>(
+const postSchema = new Schema<IPost>(
   {
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    restaurant: {
+      name: { type: String, required: true },
+      city: { type: String, required: true },
     },
-    restaurantId: {
-      type: Schema.Types.ObjectId,
-      ref: "Restaurant",
-      required: true,
-    },
-    rating: {
-      type: Number,
-      required: true,
-      min: 1,
-      max: 5,
-    },
+    rating: { type: Number, required: true, min: 1, max: 5 },
     text: {
       type: String,
       required: true,
       maxlength: 500,
     },
-    imagePath: {
-      type: String,
-    },
+    imagePath: { type: String },
   },
   {
     timestamps: true,
   }
 );
 
-export default model<IReview>("Review", reviewSchema);
+export default model<IPost>("Post", postSchema);
