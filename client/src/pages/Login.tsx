@@ -19,6 +19,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import { Link, useNavigate } from 'react-router-dom';
 import { INVALID_LOGIN_ERRORS } from '../constants/errors';
 import { useAuth } from '../contexts/AuthContext';
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 
 const Login: React.FC = () => {
   const navigate = useNavigate(); // Hook for navigation
@@ -62,6 +63,16 @@ const Login: React.FC = () => {
     // localStorage.setItem('token', 'dummy_token'); // Simulate Auth Token
     navigate('/'); // Navigate to the Posts page (Home)
   };
+
+  const onGoogleLoginSuccess = (credentialResponse: CredentialResponse) => {
+    console.log(credentialResponse);
+    localStorage.setItem('token', 'dummy_token'); // TODO: del later after implementing server-api calls
+    navigate('/');
+  }
+
+  const onGoogleLoginFailiure = () => {
+    console.log("google login failed");
+  }
 
   return (
     <Container maxWidth="sm" sx={{ mt: 8, mb: 4 }}>
@@ -153,7 +164,7 @@ const Login: React.FC = () => {
         </Box>
 
         <Stack direction="row" spacing={2} justifyContent="center">
-          <Button
+          {/* <Button
             variant="outlined"
             startIcon={<GoogleIcon />}
             sx={{ 
@@ -165,8 +176,9 @@ const Login: React.FC = () => {
             }}
           >
             Google
-          </Button>
-          <Button
+          </Button> */}
+
+          {/* <Button
             variant="outlined"
             startIcon={<FacebookIcon />}
             sx={{ 
@@ -178,7 +190,10 @@ const Login: React.FC = () => {
             }}
           >
             Facebook
-          </Button>
+          </Button> */}
+
+          <GoogleLogin onSuccess={onGoogleLoginSuccess} onError={onGoogleLoginFailiure} />
+
         </Stack>
 
         <Box sx={{ mt: 3, textAlign: 'center' }}>
