@@ -11,8 +11,6 @@ import {
   IconButton,
   InputAdornment
 } from '@mui/material';
-import GoogleIcon from '@mui/icons-material/Google';
-import FacebookIcon from '@mui/icons-material/Facebook';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import LoginIcon from '@mui/icons-material/Login';
@@ -151,7 +149,7 @@ const Login: React.FC = () => {
               <Typography variant="body1" color="error" sx={{ alignSelf: 'center', fontWeight: 'bold', direction: 'rtl' }}>
                 {loginErrorMsg}
               </Typography>
-            }          
+            }
           </Stack>
         </form>
 
@@ -163,37 +161,8 @@ const Login: React.FC = () => {
           </Divider>
         </Box>
 
-        <Stack direction="row" spacing={2} justifyContent="center">
-          {/* <Button
-            variant="outlined"
-            startIcon={<GoogleIcon />}
-            sx={{ 
-              flex: 1, 
-              borderRadius: '20px', 
-              borderColor: '#ccc', 
-              color: '#000',
-              textTransform: 'none' 
-            }}
-          >
-            Google
-          </Button> */}
-
-          {/* <Button
-            variant="outlined"
-            startIcon={<FacebookIcon />}
-            sx={{ 
-              flex: 1, 
-              borderRadius: '20px', 
-              borderColor: '#ccc', 
-              color: '#000',
-              textTransform: 'none' 
-            }}
-          >
-            Facebook
-          </Button> */}
-
+        <Stack direction="row" spacing={2} justifyContent="center">        
           <GoogleLogin onSuccess={onGoogleLoginSuccess} onError={onGoogleLoginFailiure} />
-
         </Stack>
 
         <Box sx={{ mt: 3, textAlign: 'center' }}>

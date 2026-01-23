@@ -20,6 +20,7 @@ import {
 
 // Icons
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import { Favorite } from '@mui/icons-material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CircleIcon from '@mui/icons-material/Circle';
 import CloseIcon from '@mui/icons-material/Close';
@@ -32,6 +33,7 @@ interface PostProps {
 
 const Post: React.FC<PostProps> = ({ post }) => {
   const [open, setOpen] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -41,6 +43,11 @@ const Post: React.FC<PostProps> = ({ post }) => {
     e.stopPropagation();
     setOpen(false);
   };
+
+  const handleSavePost = () => {    
+    setIsSaved(!isSaved);
+    // TODO: in the future add the rest of the logic to actually save it for the logged user
+  }
 
   const displayImage = post.imagePath || "https://via.placeholder.com/600x400?text=No+Image";
 
@@ -70,7 +77,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
                   Posted: {new Date(post.createdAt).toLocaleDateString()}
                 </Typography>
                 <Button
-                  startIcon={<FavoriteBorderIcon />}
+                  startIcon={ isSaved ? <Favorite color="error" /> : <FavoriteBorderIcon/>}
                   sx={{ 
                     color: '#000', 
                     textTransform: 'none', 
@@ -80,7 +87,8 @@ const Post: React.FC<PostProps> = ({ post }) => {
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    alert("Saved to favorites!");
+                    handleSavePost();
+                    // alert("Saved to favorites!");
                   }}
                 >
                   Save
