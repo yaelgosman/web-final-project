@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import User from "../models/user.model";
-import RefreshToken from "../models/refreshToken.model";
+import User from "../models/userModel";
+import RefreshToken from "../models/refreshTokenModel";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt";
 import bcrypt from "bcrypt";
 

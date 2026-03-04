@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import Post from "../models/post.model";
-import { AuthRequest } from "../middlewares/auth.middleware";
+import Post from "../models/postModel";
+import { AuthRequest } from "../middlewares/authMiddleware";
 
 export const createPost = async (req: AuthRequest, res: Response) => {
   const { restaurant, rating, text, imagePath } = req.body;

@@ -2,11 +2,12 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 
-import authRoutes from "./routes/auth.routes";
-import userRoutes from "./routes/user.routes";
-import postRoutes from "./routes/post.routes";
-import commentRoutes from "./routes/comment.routes";
-import likeRoutes from "./routes/like.routes";
+import authRoutes from "./routes/authRoutes";
+import userRoutes from "./routes/userRoutes";
+import postRoutes from "./routes/postRoutes";
+import commentRoutes from "./routes/commentRoutes";
+import likeRoutes from "./routes/likeRoutes";
+import uploadRoutes from "./routes/uploadRoutes";
 
 dotenv.config();
 const app = express();
@@ -19,6 +20,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/likes", likeRoutes);
+app.use("/uploads", express.static("public/uploads"));
+app.use("/upload", uploadRoutes);
 
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI =
@@ -31,9 +34,7 @@ const connectDBAndStartServer = async () => {
     console.log("MongoDB connected successfully!");
 
     app.listen(PORT, () => {
-      console.log(
-        `Server is running on [http://localhost:${PORT}](http://localhost:${PORT})`
-      );
+      console.log(`Server is running on http://localhost:${PORT}`);
     });
   } catch (error) {
     console.error("MongoDB connection error:", error);

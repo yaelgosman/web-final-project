@@ -3,8 +3,8 @@ import {
   createComment,
   getCommentsByPost,
   deleteComment,
-} from "../controllers/comment.controller";
-import { authenticate } from "../middlewares/auth.middleware";
+} from "../controllers/commentController";
+import { authenticate } from "../middlewares/authMiddleware";
 
 const router = Router();
 
