@@ -1,0 +1,64 @@
+paths:
+  /api/comments/{postId}:
+    get:
+      summary: Get comments by post ID
+      tags: [Comments]
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+
+  /api/comments:
+    post:
+      summary: Create a comment
+      tags: [Comments]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [postId, text]
+              properties:
+                postId:
+                  type: string
+                text:
+                  type: string
+      responses:
+        '201':
+          description: Comment created
+        '401':
+          description: Unauthorized
+
+  /api/comments/{id}:
+    delete:
+      summary: Delete a comment
+      tags: [Comments]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Comment deleted
+        '401':
+          description: Unauthorized
+        '404':
+          description: Comment not found
