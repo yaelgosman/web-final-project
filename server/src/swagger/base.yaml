@@ -1,0 +1,89 @@
+openapi: 3.0.0
+info:
+  title: Final Project API
+  version: 1.0.0
+  description: API documentation for the Web Final Project
+servers:
+  - url: http://localhost:3000
+    description: Local server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        provider:
+          type: string
+          enum: [local, google, facebook]
+        profileImage:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Post:
+      type: object
+      properties:
+        _id:
+          type: string
+        userId:
+          type: string
+        restaurant:
+          type: object
+          properties:
+            name:
+              type: string
+            city:
+              type: string
+        rating:
+          type: number
+        text:
+          type: string
+        imagePath:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Comment:
+      type: object
+      properties:
+        _id:
+          type: string
+        postId:
+          type: string
+        userId:
+          type: string
+        text:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    Like:
+      type: object
+      properties:
+        _id:
+          type: string
+        postId:
+          type: string
+        userId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time

@@ -3,8 +3,8 @@ import {
   likePost,
   unlikePost,
   getLikesByPost,
-} from "../controllers/like.controller";
-import { authenticate } from "../middlewares/auth.middleware";
+} from "../controllers/likeController";
+import { authenticate } from "../middlewares/authMiddleware";
 
 const router = Router();
 

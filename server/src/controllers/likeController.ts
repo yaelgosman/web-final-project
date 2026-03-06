@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import Like from "../models/like.model";
-import { AuthRequest } from "../middlewares/auth.middleware";
+import Like from "../models/likeModel";
+import { AuthRequest } from "../middlewares/authMiddleware";
 
 export const likePost = async (req: AuthRequest, res: Response) => {
   const { postId } = req.body;

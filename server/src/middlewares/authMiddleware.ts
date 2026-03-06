@@ -12,6 +12,8 @@ export const authenticate = (
 ) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: "No token provided" });
+  if (!authHeader.startsWith("Bearer "))
+    return res.status(401).json({ error: "Invalid token" });
 
   const token = authHeader.split(" ")[1];
   if (!token) return res.status(401).json({ error: "Invalid token" });
@@ -19,7 +21,7 @@ export const authenticate = (
   try {
     const payload: any = jwt.verify(
       token,
-      process.env.ACCESS_TOKEN_SECRET || "access_secret"
+      process.env.ACCESS_TOKEN_SECRET || "default_secret"
     );
     req.userId = payload.userId;
     next();

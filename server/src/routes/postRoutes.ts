@@ -4,13 +4,14 @@ import {
   getPosts,
   updatePost,
   deletePost,
-} from "../controllers/post.controller";
-import { authenticate } from "../middlewares/auth.middleware";
+} from "../controllers/postController";
+import { authenticate } from "../middlewares/authMiddleware";
+import { upload } from "../middlewares/uploadMiddleware";
 
 const router = Router();
 
 router.get("/", getPosts);
-router.post("/", authenticate, createPost);
+router.post("/", authenticate, upload.single("image"), createPost);
 router.put("/:id", authenticate, updatePost);
 router.delete("/:id", authenticate, deletePost);
 

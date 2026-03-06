@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import Comment from "../models/comment.model";
-import { AuthRequest } from "../middlewares/auth.middleware";
+import Comment from "../models/commentModel";
+import { AuthRequest } from "../middlewares/authMiddleware";
 
 export const createComment = async (req: AuthRequest, res: Response) => {
   const { postId, text } = req.body;

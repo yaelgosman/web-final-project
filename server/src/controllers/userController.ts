@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import User from "../models/user.model";
-import { AuthRequest } from "../middlewares/auth.middleware";
+import User from "../models/userModel";
+import { AuthRequest } from "../middlewares/authMiddleware";
 
 export const getProfile = async (req: AuthRequest, res: Response) => {
   const user = await User.findById(req.userId).select("-passwordHash");
