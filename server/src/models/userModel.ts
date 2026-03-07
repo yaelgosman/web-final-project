@@ -3,9 +3,9 @@ import { Schema, model, Document } from "mongoose";
 export interface IUser extends Document {
   username: string;
   email: string;
-  passwordHash?: string;
+  password?: string;
   provider: "local" | "google" | "facebook";
-  profileImage?: string;
+  profileImageUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,7 +24,7 @@ const userSchema = new Schema<IUser>(
       unique: true,
       lowercase: true,
     },
-    passwordHash: {
+    password: {
       type: String,
     },
     provider: {
@@ -32,7 +32,7 @@ const userSchema = new Schema<IUser>(
       enum: ["local", "google", "facebook"],
       default: "local",
     },
-    profileImage: {
+    profileImageUrl: {
       type: String,
     },
   },

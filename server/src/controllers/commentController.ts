@@ -12,7 +12,7 @@ export const getCommentsByPost = async (req: Request, res: Response) => {
   const { postId } = req.params;
   const comments = await Comment.find({ postId }).populate(
     "userId",
-    "username profileImage"
+    "username profileImageUrl"
   );
   res.json(comments);
 };
