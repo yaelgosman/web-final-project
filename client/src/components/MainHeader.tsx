@@ -82,7 +82,7 @@ const MainHeader: React.FC = () => {
                 />
             </Box>
 
-            {/* 3. Navigation Actions */}
+            {/* Navigation Actions */}
             <Stack direction="row" alignItems="center" spacing={1}>
                 
                 <Button color="inherit" sx={{ textTransform: 'none', fontWeight: 600, display: { xs: 'none', md: 'flex' } }}>

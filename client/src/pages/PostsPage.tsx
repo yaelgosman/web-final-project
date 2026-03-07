@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Stack, Box, Typography, CircularProgress } from '@mui/material';
-import Post from '../components/posts';
+import Post from '../components/post';
 import type { PostType } from '../types/post';
 import Navbar from '../components/Navbar';
 import { CATEGORIES } from '../constants/categories';

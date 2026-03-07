@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import MainHeader from '../components/MainHeader';
-import PostPage from '../pages/Posts';
+import PostPage from '../pages/PostsPage';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 
