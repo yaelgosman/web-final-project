@@ -1,4 +1,5 @@
 import express from "express";
+import cors from 'cors';
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import swaggerUI from "swagger-ui-express";
@@ -13,6 +14,11 @@ import swaggerSpec from "./swaggerConfig";
 
 dotenv.config();
 const app = express();
+app.use(cors({
+  origin: 'http://localhost:5173', // Allow the client app's URL
+  credentials: true, // Allow cookies/tokens to be sent
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+}));
 app.use(express.json());
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 

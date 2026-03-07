@@ -26,6 +26,7 @@ export const googleSignin = async (req: Request, res: Response) => {
       if (!user) {
         let user = await User.create({
           email,
+          username: payload?.name,
           password: "",
           profileImageUrl: payload?.picture,
         });
@@ -34,7 +35,13 @@ export const googleSignin = async (req: Request, res: Response) => {
         const refreshToken = generateRefreshToken(user._id.toString());
         await saveRefreshToken(user._id.toString(), refreshToken);
 
-        res.status(201).json({ _id: user._id, email, profileImageUrl: user.profileImageUrl, accessToken, refreshToken });
+        res.status(201).json({ _id: user._id, username: user.username, email, profileImageUrl: user.profileImageUrl, accessToken, refreshToken });
+      } else {
+        const accessToken = generateAccessToken(user._id.toString());
+        const refreshToken = generateRefreshToken(user._id.toString());
+        await saveRefreshToken(user._id.toString(), refreshToken);
+
+        res.status(201).json({ _id: user._id, username: user.username, email, profileImageUrl: user.profileImageUrl, accessToken, refreshToken });
       }
     }
   } catch (error: any) {
@@ -43,14 +50,14 @@ export const googleSignin = async (req: Request, res: Response) => {
 }
 
 export const register = async (req: Request, res: Response) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, provider } = req.body;
   const hash = await bcrypt.hash(password, 10);
 
   const user = await User.create({
     username,
     email,
     password: hash,
-    provider: "local",
+    provider: provider,
   });
 
   const accessToken = generateAccessToken(user._id.toString());
@@ -73,7 +80,7 @@ export const login = async (req: Request, res: Response) => {
   const refreshToken = generateRefreshToken(user._id.toString());
   await saveRefreshToken(user._id.toString(), refreshToken);
 
-  res.status(201).json({ _id: user._id, email, profileImageUrl: user.profileImageUrl, accessToken, refreshToken });
+  res.status(201).json({ _id: user._id, username: user.username, email, profileImageUrl: user.profileImageUrl, accessToken, refreshToken });
 };
 
 export const refresh = async (req: Request, res: Response) => {
