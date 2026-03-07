@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import {
   Box,
@@ -19,6 +20,7 @@ import { INVALID_LOGIN_ERRORS } from '../constants/errors';
 import { useAuth } from '../contexts/AuthContext';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
+import { loginUser, googleSignIn } from '../services/userService';
 
 const Login: React.FC = () => {
   const navigate = useNavigate(); // Hook for navigation
@@ -27,64 +29,120 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginErrorMsg, setLoginErrorMsg] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  // const handleLogin = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   console.log("Login with:", { email, password });
+
+  //   if (email === '' || password === '') {
+  //     setLoginErrorMsg(INVALID_LOGIN_ERRORS.EMPTY_CREDENTIALS);
+  //     return;
+  //   }
+
+  //   // TODO: add here the call to the Login request + Navigate to home page if valid!
+
+  //   const mockupUserToValidate = { email: 'e@gmail.com', password: '123' };
+
+  //   if ( email !== mockupUserToValidate.email || password !== mockupUserToValidate.password ) {
+  //     setLoginErrorMsg(INVALID_LOGIN_ERRORS.INVALID_CREDENTIALS);
+  //     return;
+  //   }
+
+  //   // --- Mock Data simulating API response ---
+  //   const mockUserResponse = {
+  //     _id: "123",
+  //     username: "Bobby",
+  //     email: email,
+  //     provider: "local" as const,
+  //     profileImage: "https://mui.com/static/images/avatar/2.jpg" // Dummy image
+  //   };
+  //   const mockToken = "abc-123-token";
+
+  //   login(mockUserResponse, mockToken);
+
+  //   // --- MOCK LOGIN SUCCESS ---
+  //   // localStorage.setItem('token', 'dummy_token'); // Simulate Auth Token
+  //   navigate('/'); // Navigate to the Posts page (Home)
+  // };
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login with:", { email, password });
+    setLoginErrorMsg('');
 
-    if (email === '' || password === '') {
+    if (!email || !password) {
       setLoginErrorMsg(INVALID_LOGIN_ERRORS.EMPTY_CREDENTIALS);
       return;
     }
 
-    // TODO: add here the call to the Login request + Navigate to home page if valid!
+    try {
+      setIsLoading(true);
+      
+      // Pass the user credentials. (You might need to cast or adjust types based on UserType)
+      const response: any = await loginUser({ email, password } as any); 
 
-    const mockupUserToValidate = { email: 'e@gmail.com', password: '123' };
+      // Assuming your backend returns { user: {...}, token: "..." } in response.data
+      const user = response.user || response; 
+      const token = response.token || "temp-token"; // Adjust based on your actual backend response
 
-    if ( email !== mockupUserToValidate.email || password !== mockupUserToValidate.password ) {
-      setLoginErrorMsg(INVALID_LOGIN_ERRORS.INVALID_CREDENTIALS);
-      return;
+      console.log(`user: `, user);
+      login(user, token); // Update context
+      
+      // Navigate to home
+      navigate('/'); 
+
+    } catch (error: any) {
+      console.error("Login Error:", error);
+      setLoginErrorMsg(error.response?.data?.message || INVALID_LOGIN_ERRORS.INVALID_CREDENTIALS);
+    } finally {
+      setIsLoading(false);
     }
-
-    // --- Mock Data simulating API response ---
-    const mockUserResponse = {
-      _id: "123",
-      username: "Bobby",
-      email: email,
-      provider: "local" as const,
-      profileImage: "https://mui.com/static/images/avatar/2.jpg" // Dummy image
-    };
-    const mockToken = "abc-123-token";
-
-    login(mockUserResponse, mockToken);
-
-    // --- MOCK LOGIN SUCCESS ---
-    // localStorage.setItem('token', 'dummy_token'); // Simulate Auth Token
-    navigate('/'); // Navigate to the Posts page (Home)
   };
 
-  const onGoogleLoginSuccess = (credentialResponse: CredentialResponse) => {
-    console.log(credentialResponse);
+  // const onGoogleLoginSuccess = (credentialResponse: CredentialResponse) => {
+  //   console.log(credentialResponse);
 
-    if (credentialResponse.credential) {
-      // Decode the Google JWT to get the user's details
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const decodedToken: any = jwtDecode(credentialResponse.credential);
+  //   if (credentialResponse.credential) {
+  //     // Decode the Google JWT to get the user's details
+  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //     const decodedToken: any = jwtDecode(credentialResponse.credential);
       
-      // Map Google's data to match our User structure
-      const googleUser = {
-        _id: decodedToken.sub, // Google's unique identifier for the user
-        username: decodedToken.name,
-        email: decodedToken.email,
-        provider: "google" as const,
-        profileImage: decodedToken.picture // Get their actual Google pfp
-      };
+  //     // Map Google's data to match our User structure
+  //     const googleUser = {
+  //       _id: decodedToken.sub, // Google's unique identifier for the user
+  //       username: decodedToken.name,
+  //       email: decodedToken.email,
+  //       provider: "google" as const,
+  //       profileImage: decodedToken.picture // Get their actual Google pfp
+  //     };
 
-      // Update the AuthContext (This is updates the Navbar state)
-      login(googleUser, credentialResponse.credential);
+  //     // Update the AuthContext (This is updates the Navbar state)
+  //     login(googleUser, credentialResponse.credential);
 
-      localStorage.setItem('token', credentialResponse.credential);
+  //     localStorage.setItem('token', credentialResponse.credential);
+  //     navigate('/');
+  //   }
+  // }
+
+  const onGoogleLoginSuccess = async (credentialResponse: CredentialResponse) => {
+    try {
+      setIsLoading(true);
+      
+      // Send Google's response to your backend
+      const response: any = await googleSignIn(credentialResponse);
+      
+      // Assuming your backend returns { user: {...}, token: "..." }
+      const user = response.user || response;
+      const token = response.token || credentialResponse.credential; // Fallback to google token if backend doesn't send one
+
+      login(user, token); // Update context
       navigate('/');
+
+    } catch (error: any) {
+      console.error("Google Login Error:", error);
+      setLoginErrorMsg("Google Sign-In failed on the server.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -150,6 +208,7 @@ const Login: React.FC = () => {
               variant="contained"
               fullWidth
               size="large"
+              disabled={isLoading}
               startIcon={<LoginIcon />}
               sx={{
                 bgcolor: '#004d40',
@@ -161,7 +220,7 @@ const Login: React.FC = () => {
                 '&:hover': { bgcolor: '#00382e' },
               }}
             >
-              Sign In
+              {isLoading ? 'Signing In...' : 'Sign In'}
             </Button>
 
             {

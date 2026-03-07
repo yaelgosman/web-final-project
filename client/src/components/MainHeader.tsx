@@ -127,11 +127,11 @@ const MainHeader: React.FC = () => {
                                 aria-expanded={open ? 'true' : undefined}
                             >
                                 <Avatar
-                                    src={`${user?.profileImage}`}
-                                    alt={user?.username}
+                                    src={typeof user?.profileImage === 'string' ? user.profileImage : undefined}
+                                    alt={user?.username || 'User'}
                                     sx={{ width: 40, height: 40, bgcolor: '#004d40'}}
                                 >
-                                    {user?.username.charAt(0).toUpperCase()}
+                                    {user?.username?.charAt(0)?.toUpperCase() || 'U'}
                                 </Avatar>
                             </IconButton>
 

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from 'react';
 import {
   Box,
@@ -19,6 +21,8 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { Link, useNavigate } from 'react-router-dom';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { INVALID_REGISTRATION_ERRORS } from '../constants/errors';
+import { registerUser } from '../services/userService';
+import { UserType } from '../types/user';
 
 const Register: React.FC = () => {
     const navigate = useNavigate();
@@ -37,6 +41,7 @@ const Register: React.FC = () => {
     
     // UI State
     const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -50,8 +55,10 @@ const Register: React.FC = () => {
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setRegisterErrorMsg('');
+
         if (formData.password !== formData.confirmPassword) {
             setRegisterErrorMsg(INVALID_REGISTRATION_ERRORS.DIFFERENT_PASSWORDS);
             return;
@@ -62,14 +69,49 @@ const Register: React.FC = () => {
             return;
         }
         
-        // Handle registration logic (include profileImage in FormData)
-        console.log("Registering:", formData, profileImage); //for debug only.
-        // TODO: add here the call to the Register API request.
-        // TODO: add here later the navigatio to the HomePage!
+        try {
+            setIsLoading(true);
 
-        // --- MOCK REGISTER SUCCESS ---
+        // 4. Create FormData payload to handle the image + text data
+        const dataToSubmit: UserType =  {
+            username: formData.username,
+            email: formData.email,
+            password: formData.password,
+            provider: "local",
+        }      
+        
+        if (profileImage) {
+            dataToSubmit.profileImage = profileImage;
+        }
+
+        // 5. Call the API
+        // Note: If your userService.register expects plain JSON instead of FormData, 
+        // replace `dataToSubmit` with: { username: formData.username, email: formData.email, password: formData.password }
+        const response = await registerUser(dataToSubmit);
+
+        // 6. Handle Success
         alert("Registration successful! Please login.");
-        navigate('/login'); // Navigate to Login page
+        navigate('/login'); 
+
+        } catch (error: any) {
+            // 7. Handle Failure
+            console.error("Registration failed:", error);
+            // Extract error message from backend response if available
+            const errorMessage = error.response?.data?.message || "An error occurred during registration. Please try again.";
+            setRegisterErrorMsg(errorMessage);
+        } finally {
+            setIsLoading(false);
+        }
+        
+        // // Handle registration logic (include profileImage in FormData)
+        // console.log("Registering:", formData, profileImage); //for debug only.
+
+        // // TODO: add here the call to the Register API request.
+        // // TODO: add here later the navigatio to the HomePage!
+
+        // // --- MOCK REGISTER SUCCESS ---
+        // alert("Registration successful! Please login.");
+        // navigate('/login'); // Navigate to Login page
     };
 
     const onGoogleRegisterSuccess = (credentialResponse: CredentialResponse) => {
@@ -186,6 +228,7 @@ const Register: React.FC = () => {
                     variant="contained"
                     fullWidth
                     size="large"
+                    disabled={isLoading}
                     sx={{
                         mt: 1,
                         bgcolor: '#004d40',
@@ -197,7 +240,7 @@ const Register: React.FC = () => {
                         '&:hover': { bgcolor: '#00382e' },
                     }}
                 >
-                    Sign Up
+                    {isLoading ? 'Creating Account...' : 'Sign Up'}
                 </Button>
 
                 {
