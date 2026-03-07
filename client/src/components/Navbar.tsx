@@ -20,12 +20,13 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ selectedCategory, onSelectCategory }) => {
   return (
     <Box sx={{ py: 2, borderBottom: '1px solid #e0e0e0', mb: 2, bgcolor: 'white', zIndex: 10 }}>
-      <Container maxWidth="lg">
+      <Container maxWidth="md">
         <Stack direction="row" spacing={2} alignItems="center" sx={{ overflowX: 'auto', pb: 1 }}>
           
-          <IconButton sx={{ border: '1px solid #ccc', color: '#000' }}>
+          {/* This is for the future if the categories will overflow the navbar width - to be able to scroll between them */}
+          {/* <IconButton sx={{ border: '1px solid #ccc', color: '#000' }}>
             <ArrowBackIcon />
-          </IconButton>
+          </IconButton> */}
 
           {CATEGORIES.map((cat) => {
             const isActive = cat.id === selectedCategory;

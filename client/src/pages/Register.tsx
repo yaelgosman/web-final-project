@@ -15,10 +15,10 @@ import {
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import GoogleIcon from '@mui/icons-material/Google';
-import FacebookIcon from '@mui/icons-material/Facebook';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { Link, useNavigate } from 'react-router-dom';
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
+import { INVALID_REGISTRATION_ERRORS } from '../constants/errors';
 
 const Register: React.FC = () => {
     const navigate = useNavigate();
@@ -29,6 +29,7 @@ const Register: React.FC = () => {
         password: '',
         confirmPassword: ''
     });
+    const [registerErrorMsg, setRegisterErrorMsg] = useState('');    
   
     // Image State
     const [profileImage, setProfileImage] = useState<File | null>(null);
@@ -43,18 +44,24 @@ const Register: React.FC = () => {
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-        const file = e.target.files[0];
-        setProfileImage(file);
-        setPreviewUrl(URL.createObjectURL(file));
+            const file = e.target.files[0];
+            setProfileImage(file);
+            setPreviewUrl(URL.createObjectURL(file));
         }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (formData.password !== formData.confirmPassword) {
-        alert("Passwords do not match!");
-        return;
+            setRegisterErrorMsg(INVALID_REGISTRATION_ERRORS.DIFFERENT_PASSWORDS);
+            return;
         }
+
+        if (formData.email === '' || formData.password === '' || formData.username === '' || formData.confirmPassword === '') {
+            setRegisterErrorMsg(INVALID_REGISTRATION_ERRORS.MISSING_FIELDS);
+            return;
+        }
+        
         // Handle registration logic (include profileImage in FormData)
         console.log("Registering:", formData, profileImage); //for debug only.
         // TODO: add here the call to the Register API request.
@@ -64,6 +71,16 @@ const Register: React.FC = () => {
         alert("Registration successful! Please login.");
         navigate('/login'); // Navigate to Login page
     };
+
+    const onGoogleRegisterSuccess = (credentialResponse: CredentialResponse) => {
+    console.log(credentialResponse);
+    localStorage.setItem('token', 'dummy_token'); // TODO: del later after implementing server-api calls
+    navigate('/');
+  }
+
+  const onGoogleRegisterFailiure = () => {
+    console.log("google registration failed");
+  }
 
     return (
         <Container maxWidth="sm" sx={{ mt: 6, mb: 4 }}>
@@ -113,75 +130,82 @@ const Register: React.FC = () => {
                 </Stack>
 
                 <TextField
-                label="Username"
-                name="username"
-                fullWidth
-                variant="outlined"
-                value={formData.username}
-                onChange={handleChange}
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    label="Username"
+                    name="username"
+                    fullWidth
+                    variant="outlined"
+                    value={formData.username}
+                    onChange={handleChange}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                 />
 
                 <TextField
-                label="Email Address"
-                name="email"
-                type="email"
-                fullWidth
-                variant="outlined"
-                value={formData.email}
-                onChange={handleChange}
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    label="Email Address"
+                    name="email"
+                    type="email"
+                    fullWidth
+                    variant="outlined"
+                    value={formData.email}
+                    onChange={handleChange}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                 />
                 
                 <TextField
-                label="Password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                fullWidth
-                variant="outlined"
-                value={formData.password}
-                onChange={handleChange}
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                InputProps={{
-                    endAdornment: (
-                    <InputAdornment position="end">
-                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                    </InputAdornment>
-                    ),
-                }}
+                    label="Password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    fullWidth
+                    variant="outlined"
+                    value={formData.password}
+                    onChange={handleChange}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputProps={{
+                        endAdornment: (
+                        <InputAdornment position="end">
+                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                        </InputAdornment>
+                        ),
+                    }}
                 />
 
                 <TextField
-                label="Confirm Password"
-                name="confirmPassword"
-                type={showPassword ? 'text' : 'password'}
-                fullWidth
-                variant="outlined"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    label="Confirm Password"
+                    name="confirmPassword"
+                    type={showPassword ? 'text' : 'password'}
+                    fullWidth
+                    variant="outlined"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                 />
 
                 <Button
-                type="submit"
-                variant="contained"
-                fullWidth
-                size="large"
-                sx={{
-                    mt: 1,
-                    bgcolor: '#004d40',
-                    color: '#fff',
-                    borderRadius: '20px',
-                    py: 1.5,
-                    fontWeight: 'bold',
-                    textTransform: 'none',
-                    '&:hover': { bgcolor: '#00382e' },
-                }}
+                    type="submit"
+                    variant="contained"
+                    fullWidth
+                    size="large"
+                    sx={{
+                        mt: 1,
+                        bgcolor: '#004d40',
+                        color: '#fff',
+                        borderRadius: '20px',
+                        py: 1.5,
+                        fontWeight: 'bold',
+                        textTransform: 'none',
+                        '&:hover': { bgcolor: '#00382e' },
+                    }}
                 >
-                Sign Up
+                    Sign Up
                 </Button>
+
+                {
+                    (registerErrorMsg != '') && 
+                    <Typography variant="body1" color="error" sx={{ alignSelf: 'center', fontWeight: 'bold', direction: 'rtl' }}>
+                        {registerErrorMsg}
+                    </Typography>
+                } 
             </Stack>
             </form>
 
@@ -194,20 +218,7 @@ const Register: React.FC = () => {
             </Box>
 
             <Stack direction="row" spacing={2} justifyContent="center">
-                <Button
-                variant="outlined"
-                startIcon={<GoogleIcon />}
-                sx={{ flex: 1, borderRadius: '20px', borderColor: '#ccc', color: '#000', textTransform: 'none' }}
-            >
-                Google
-            </Button>
-            <Button
-                variant="outlined"
-                startIcon={<FacebookIcon />}
-                sx={{ flex: 1, borderRadius: '20px', borderColor: '#ccc', color: '#000', textTransform: 'none' }}
-            >
-                Facebook
-            </Button>
+                <GoogleLogin onSuccess={onGoogleRegisterSuccess} onError={onGoogleRegisterFailiure} />
             </Stack>
             
            <Box sx={{ mt: 3, textAlign: 'center' }}>
