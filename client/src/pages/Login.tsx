@@ -18,6 +18,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { INVALID_LOGIN_ERRORS } from '../constants/errors';
 import { useAuth } from '../contexts/AuthContext';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
 
 const Login: React.FC = () => {
   const navigate = useNavigate(); // Hook for navigation
@@ -64,8 +65,27 @@ const Login: React.FC = () => {
 
   const onGoogleLoginSuccess = (credentialResponse: CredentialResponse) => {
     console.log(credentialResponse);
-    localStorage.setItem('token', 'dummy_token'); // TODO: del later after implementing server-api calls
-    navigate('/');
+
+    if (credentialResponse.credential) {
+      // Decode the Google JWT to get the user's details
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const decodedToken: any = jwtDecode(credentialResponse.credential);
+      
+      // Map Google's data to match our User structure
+      const googleUser = {
+        _id: decodedToken.sub, // Google's unique identifier for the user
+        username: decodedToken.name,
+        email: decodedToken.email,
+        provider: "google" as const,
+        profileImage: decodedToken.picture // Get their actual Google pfp
+      };
+
+      // Update the AuthContext (This is updates the Navbar state)
+      login(googleUser, credentialResponse.credential);
+
+      localStorage.setItem('token', credentialResponse.credential);
+      navigate('/');
+    }
   }
 
   const onGoogleLoginFailiure = () => {
