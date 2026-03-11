@@ -1,0 +1,190 @@
+import { useState, useEffect } from "react";
+import { PostType } from "../../types/post";
+import { UserProfileProps, UserType } from "../../types/user";
+import { styles } from './UserProfile.styles';
+import { EditProfileModal } from "../../components/EditProfile/EditProfile";
+
+export const UserProfile: React.FC<UserProfileProps> = ({ profileUserId, loggedInUserId }) => {
+  const [userData, setUserData] = useState<UserType | null>(null);
+  const [posts, setPosts] = useState<PostType[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+
+  const isOwnProfile = profileUserId === loggedInUserId;
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      setIsLoading(true);
+      
+      // Mock data injection matching your types
+      setUserData({
+        _id: profileUserId,
+        username: 'Ofir',
+        email: 'user@example.com',
+        provider: 'local',
+        profileImage: 'https://thumbs.dreamstime.com/b/default-avatar-profile-vector-user-profile-default-avatar-profile-vector-user-profile-profile-179376714.jpg', 
+        createdAt: new Date().toISOString()
+      });
+
+      setPosts([
+        { 
+          _id: '1', 
+          userId: profileUserId, 
+          restaurant: { name: 'Trattoria Bella', city: 'Rome' }, 
+          rating: 5, 
+          text: 'Best carbonara ever!',
+          imagePath: 'https://static.toiimg.com/thumb/53784736.cms?imgsize=51659&width=800&height=800',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        { 
+          _id: '2', 
+          userId: profileUserId, 
+          restaurant: { name: 'The Grind Cafe', city: 'Tel Aviv' }, 
+          rating: 4, 
+          imagePath: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRukVq3uaqVuS9RRUzaByz6y1CjWDF485z92Q&s',
+          text: 'Great espresso, but limited seating.',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+      ]);
+      
+      setIsLoading(false);
+    };
+
+    fetchProfileData();
+  }, [profileUserId]);
+
+  const handleEditProfile = () => {
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveProfile = async (updatedData: Partial<UserType>) => {
+  // if (!userData?._id) return; //TODO: uncomment later - this is so it will update locally before implementation of server logic
+
+  try {
+    const formData = new FormData();
+
+    if (updatedData.username) {
+      formData.append('username', updatedData.username);
+    }
+
+    // We check if it's an instance of File to ensure we aren't appending a string URL
+    if (updatedData.profileImage instanceof File) {
+      formData.append('profileImage', updatedData.profileImage);
+    }
+
+    // Send the request to the backend
+    
+    /* Example fetch request:
+    const response = await fetch(`http://localhost:5000/api/users/${userData._id}`, {
+      method: 'PUT', // or PATCH depending on your API
+      body: formData,
+      // headers: {
+      //   Authorization: `Bearer ${yourAuthToken}` // Add auth headers if needed
+      // }
+    });
+
+    if (!response.ok) throw new Error('Failed to update profile');
+    
+    // Typically, your server will respond with the updated user object containing the new image URL
+    const updatedUserFromServer = await response.json();
+    */
+
+    // Update local UI state
+    // If you use the fetch request above, you would do: setUserData(updatedUserFromServer)
+    
+    setUserData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        username: updatedData.username || prev.username,
+        profileImage: updatedData.profileImage || prev.profileImage
+      };
+    });
+
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    // TODO: Add error handling UI, like a toast notification
+  }
+};
+
+  // Helper to safely render the profile image whether it's a URL string or a File object
+  const getProfileImageUrl = (image?: string | File) => {
+    if (!image) return 'https://via.placeholder.com/150'; // Default fallback
+    if (typeof image === 'string') return image;
+    return URL.createObjectURL(image);
+  };
+
+  if (isLoading || !userData) {
+    return <div style={{ textAlign: 'center', padding: '50px' }}>Loading profile...</div>;
+  }
+
+  return (
+    <div style={styles.container}>
+      {/* Header Section */}
+      <header style={styles.header}>
+        <img 
+          src={getProfileImageUrl(userData.profileImage)} 
+          alt={`${userData.username}'s avatar`} 
+          style={styles.avatar} 
+        />
+        
+        <div style={styles.headerInfo}>
+          <div style={styles.usernameRow}>
+            <h2 style={styles.username}>{userData.username}</h2>
+            {isOwnProfile && (
+              <button style={styles.editButton} onClick={handleEditProfile}>
+                Edit Details
+              </button>
+            )}
+          </div>
+
+          <div style={styles.statsRow}>
+            <span style={styles.stat}><strong>{posts.length}</strong> reviews</span>
+          </div>
+          
+          {/* Displaying email as the only other user detail available */}
+          <div style={styles.bioSection}>
+            <p style={styles.joinDate}>Joined {new Date(userData.createdAt || '').toLocaleDateString()}</p>
+          </div>
+        </div>
+      </header>
+
+      <hr style={styles.divider} />
+
+      {/* Posts Grid */}
+      <section>
+        <h3 style={styles.sectionTitle}>Reviews</h3>
+        <div style={styles.grid}>
+          {posts.map((post) => (
+            <div key={post._id} style={styles.gridItem}>
+              {post.imagePath ? (
+                <img src={post.imagePath} alt={post.restaurant.name} style={styles.reviewImage} />
+              ) : (
+                <div style={styles.noImagePlaceholder}>
+                  <p>No Image Provided</p>
+                </div>
+              )}
+              
+              <div style={styles.reviewOverlay}>
+                <span style={styles.rating}>{'🟢'.repeat(post.rating)}{'⚪'.repeat(5 - post.rating)}</span>
+                <p style={styles.restaurantName}>{post.restaurant.name}</p>
+                <p style={styles.restaurantCity}>{post.restaurant.city}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+      {userData && (
+        <EditProfileModal 
+          currentUser={userData} 
+          isOpen={isEditModalOpen} 
+          onClose={() => setIsEditModalOpen(false)} 
+          onSave={handleSaveProfile} 
+        />
+      )}
+    </div>
+  );
+};

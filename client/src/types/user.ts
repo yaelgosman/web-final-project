@@ -7,3 +7,8 @@ export interface UserType {
   profileImage?: string | File; // Can be a URL string or a File object during upload
   createdAt?: string;
 }
+
+export interface UserProfileProps {
+  profileUserId: string;
+  loggedInUserId: string;
+}
