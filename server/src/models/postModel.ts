@@ -1,7 +1,7 @@
 import { Schema, model, Document, Types } from "mongoose";
 
 export interface IPost extends Document {
-  userId: Types.ObjectId;
+  userId: String;
   restaurant: {
     name: string;
     city: string;
@@ -15,7 +15,7 @@ export interface IPost extends Document {
 
 const postSchema = new Schema<IPost>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    userId: { type: String, ref: "User", required: true },
     restaurant: {
       name: { type: String, required: true },
       city: { type: String, required: true },
