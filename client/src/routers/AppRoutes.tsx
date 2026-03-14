@@ -33,8 +33,9 @@ const AppRoutes: React.FC = () => {
       {/* Protected Routes */}
       <Route element={<ProtectedLayout />}>
         <Route path="/" element={<PostPage />} />
-        <Route path="/Profile" element={<UserProfile profileUserId='' loggedInUserId='' />} />
-        {/* TODO: later check how to transfer these args dynamically!! ^ */}
+        <Route path="/profile" element={<UserProfile/>} />
+        <Route path="/profile/:id" element={<UserProfile/>} />
+        {/* by adding the :id part we make the path dynamic. and the regular /Profile is for the logged-in user */}
         {/* Add more protected routes here later */}
       </Route>
 

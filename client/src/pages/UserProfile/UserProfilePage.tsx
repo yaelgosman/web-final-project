@@ -3,16 +3,23 @@ import { PostType } from "../../types/post";
 import { UserProfileProps, UserType } from "../../types/user";
 import { styles } from './UserProfile.styles';
 import { EditProfileModal } from "../../components/EditProfile/EditProfile";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
-export const UserProfile: React.FC<UserProfileProps> = ({ profileUserId, loggedInUserId }) => {
+export const UserProfile: React.FC = () => {
   const location = useLocation();
+  const { id } = useParams<{ id : string }>(); // Gets the :id from the URL
+  const { user: loggedInUser } = useAuth(); // Gets the logged-in user from the Auth context
   const [userData, setUserData] = useState<UserType | null>(null);
   const [posts, setPosts] = useState<PostType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const isOwnProfile = profileUserId === loggedInUserId;
+  // If theres an ID in the URL, use it. else use the logged-in user's ID
+  const profileUserId = id || loggedInUser?._id;
+  const loggedInUserId = loggedInUser?._id;
+
+  const isOwnProfile = Boolean(profileUserId && loggedInUserId && profileUserId === loggedInUserId);
 
   // Catch navigation state to open edit modal
   useEffect(() => {
@@ -26,6 +33,8 @@ export const UserProfile: React.FC<UserProfileProps> = ({ profileUserId, loggedI
   }, [location.state, isOwnProfile]);
 
   useEffect(() => {
+    if (!profileUserId) return; // Wait until we have an ID
+
     const fetchProfileData = async () => {
       setIsLoading(true);
       

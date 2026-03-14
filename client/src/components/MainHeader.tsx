@@ -55,10 +55,14 @@ const MainHeader: React.FC = () => {
 
     // Handles dynamic navigation for the user's choice, (Options is to pass a specific state to the router: for example the logged user's id to the profile page)
     const handleNavigationToPages = (navigateTo: string, options?: { state?: any}) => {
-        // if the given path doesnt exist (or isnt valid) - do nothing
-        if (!(VALID_PATHS.includes(navigateTo))) {
+        // if the given path doesnt exist (or isnt valid) - do nothing. (checks if exact match or if its a dynamic profile route by :id)
+        const isValid = VALID_PATHS.includes(navigateTo) || navigateTo.startsWith('/profile')
+
+        if (!isValid) {
             return;
         }
+
+        // TODO: check if we even need this validation... since we already have a "fallback path * " for invalid paths...
 
         handleMenuClose();
         navigate(navigateTo, options);
@@ -174,17 +178,17 @@ const MainHeader: React.FC = () => {
                                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                             >
 
-                                <MenuItem onClick={() => handleNavigationToPages("/Profile")}>
+                                <MenuItem onClick={() => handleNavigationToPages("/profile")}>
                                     <Avatar src={`${user?.profileImage}`} /> <b>{user?.username}</b>
                                 </MenuItem>
                                 <Divider/>
 
-                                <MenuItem onClick={() => handleNavigationToPages("/Profile", { state: { editMode: true } })}>
+                                <MenuItem onClick={() => handleNavigationToPages(`/profile/${user?._id}`, { state: { editMode: true } })}>
                                     <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
                                     Profile Settings
                                 </MenuItem>
                                 
-                                <MenuItem onClick={() => handleNavigationToPages("/Profile")}>
+                                <MenuItem onClick={() => handleNavigationToPages("/profile")}>
                                     <ListItemIcon><ReceiptLongIcon fontSize="small" /></ListItemIcon>
                                     My Posts
                                 </MenuItem>
