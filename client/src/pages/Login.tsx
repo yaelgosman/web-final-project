@@ -31,41 +31,6 @@ const Login: React.FC = () => {
   const [loginErrorMsg, setLoginErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // const handleLogin = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   console.log("Login with:", { email, password });
-
-  //   if (email === '' || password === '') {
-  //     setLoginErrorMsg(INVALID_LOGIN_ERRORS.EMPTY_CREDENTIALS);
-  //     return;
-  //   }
-
-  //   // TODO: add here the call to the Login request + Navigate to home page if valid!
-
-  //   const mockupUserToValidate = { email: 'e@gmail.com', password: '123' };
-
-  //   if ( email !== mockupUserToValidate.email || password !== mockupUserToValidate.password ) {
-  //     setLoginErrorMsg(INVALID_LOGIN_ERRORS.INVALID_CREDENTIALS);
-  //     return;
-  //   }
-
-  //   // --- Mock Data simulating API response ---
-  //   const mockUserResponse = {
-  //     _id: "123",
-  //     username: "Bobby",
-  //     email: email,
-  //     provider: "local" as const,
-  //     profileImage: "https://mui.com/static/images/avatar/2.jpg" // Dummy image
-  //   };
-  //   const mockToken = "abc-123-token";
-
-  //   login(mockUserResponse, mockToken);
-
-  //   // --- MOCK LOGIN SUCCESS ---
-  //   // localStorage.setItem('token', 'dummy_token'); // Simulate Auth Token
-  //   navigate('/'); // Navigate to the Posts page (Home)
-  // };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginErrorMsg('');
@@ -78,14 +43,13 @@ const Login: React.FC = () => {
     try {
       setIsLoading(true);
       
-      // Pass the user credentials. (You might need to cast or adjust types based on UserType)
+      // Pass the user credentials.
       const response: any = await loginUser({ email, password } as any); 
 
-      // Assuming your backend returns { user: {...}, token: "..." } in response.data
       const user = response.user || response; 
-      const token = response.token || "temp-token"; // Adjust based on your actual backend response
+      const token = response.accessToken || "temp-token";
 
-      console.log(`user: `, user);
+      // console.log(`user: `, user);
       login(user, token); // Update context
       
       // Navigate to home
@@ -127,16 +91,34 @@ const Login: React.FC = () => {
   const onGoogleLoginSuccess = async (credentialResponse: CredentialResponse) => {
     try {
       setIsLoading(true);
+
+      console.log(`credentials: `, credentialResponse);
       
       // Send Google's response to your backend
       const response: any = await googleSignIn(credentialResponse);
-      
-      // Assuming your backend returns { user: {...}, token: "..." }
-      const user = response.user || response;
-      const token = response.token || credentialResponse.credential; // Fallback to google token if backend doesn't send one
 
-      login(user, token); // Update context
-      navigate('/');
+      // console.log(`response: `, response);
+
+      if (credentialResponse.credential) {
+        // Decode the Google JWT to get the user's details
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const decodedToken: any = jwtDecode(credentialResponse.credential);
+        
+        // Map Google's data to match our User structure
+        const user = {
+          _id: decodedToken.sub, // Google's unique identifier for the user
+          username: decodedToken.name,
+          email: decodedToken.email,
+          provider: "google" as const,
+          profileImage: decodedToken.picture // Get their actual Google pfp
+        };
+    
+        // const user = response.user || response;
+        const token = response.accessToken || credentialResponse.credential; // Fallback to google token if backend doesn't send one
+
+        login(user, token); // Update context
+        navigate('/');
+      }
 
     } catch (error: any) {
       console.error("Google Login Error:", error);

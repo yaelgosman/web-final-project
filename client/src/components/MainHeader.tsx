@@ -143,7 +143,7 @@ const MainHeader: React.FC = () => {
                                 aria-expanded={open ? 'true' : undefined}
                             >
                                 <Avatar
-                                    src={typeof user?.profileImage === 'string' ? user.profileImage : undefined}
+                                    src={typeof user?.profileImageUrl === 'string' ? user.profileImageUrl : undefined}
                                     alt={user?.username || 'User'}
                                     sx={{ width: 40, height: 40, bgcolor: '#004d40'}}
                                 >
@@ -179,7 +179,7 @@ const MainHeader: React.FC = () => {
                             >
 
                                 <MenuItem onClick={() => handleNavigationToPages("/profile")}>
-                                    <Avatar src={`${user?.profileImage}`} /> <b>{user?.username}</b>
+                                    <Avatar src={`${user?.profileImageUrl}`} /> <b>{user?.username}</b>
                                 </MenuItem>
                                 <Divider/>
 

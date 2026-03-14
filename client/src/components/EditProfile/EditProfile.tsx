@@ -21,12 +21,12 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ currentUser,
       setUsername(currentUser.username);
       setSelectedFile(null); // Clear any previously selected file
       
-      if (!currentUser.profileImage) {
+      if (!currentUser.profileImageUrl) {
         setPreviewUrl('https://via.placeholder.com/150');
-      } else if (typeof currentUser.profileImage === 'string') {
-        setPreviewUrl(currentUser.profileImage);
-      } else if (currentUser.profileImage instanceof File) {
-        setPreviewUrl(URL.createObjectURL(currentUser.profileImage));
+      } else if (typeof currentUser.profileImageUrl === 'string') {
+        setPreviewUrl(currentUser.profileImageUrl);
+      } else if (currentUser.profileImageUrl instanceof File) {
+        setPreviewUrl(URL.createObjectURL(currentUser.profileImageUrl));
       }
     }
   }, [isOpen, currentUser]);
