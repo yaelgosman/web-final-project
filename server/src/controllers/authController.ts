@@ -28,6 +28,7 @@ export const googleSignin = async (req: Request, res: Response) => {
           email,
           username: payload?.name,
           password: "",
+          provider: "google",
           profileImageUrl: payload?.picture,
         });
 

@@ -21,11 +21,12 @@ export const authenticate = (
   try {
     const payload: any = jwt.verify(
       token,
-      process.env.ACCESS_TOKEN_SECRET || "default_secret"
+      process.env.ACCESS_TOKEN_SECRET || "access_secret"
     );
     req.userId = payload.userId;
     next();
   } catch (err) {
+    console.error("JWT Verification Error:", err);
     return res.status(401).json({ error: "Invalid token" });
   }
 };

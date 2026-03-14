@@ -1,7 +1,9 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import cors from 'cors';
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 import swaggerUI from "swagger-ui-express";
 
 import authRoutes from "./routes/authRoutes";
@@ -12,7 +14,7 @@ import likeRoutes from "./routes/likeRoutes";
 import uploadRoutes from "./routes/uploadRoutes";
 import swaggerSpec from "./swaggerConfig";
 
-dotenv.config();
+
 const app = express();
 app.use(cors({
   origin: 'http://localhost:5173', // Allow the client app's URL
