@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { UserType } from '../../types/user'; 
 import { modalStyles } from './EditProfile.styles';
 
@@ -13,14 +13,23 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ currentUser,
   const [username, setUsername] = useState(currentUser.username);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string>('https://via.placeholder.com/150');
 
-  // Initialize the preview URL once synchronously
-  const [previewUrl, setPreviewUrl] = useState<string>(() => {
-    if (!currentUser.profileImage) return 'https://via.placeholder.com/150';
-    if (typeof currentUser.profileImage === 'string') return currentUser.profileImage;
-    if (currentUser.profileImage instanceof File) return URL.createObjectURL(currentUser.profileImage);
-    return 'https://via.placeholder.com/150'; 
-  });
+  // Sync local state when the modal opens or user data changes
+  useEffect(() => {
+    if (isOpen) {
+      setUsername(currentUser.username);
+      setSelectedFile(null); // Clear any previously selected file
+      
+      if (!currentUser.profileImage) {
+        setPreviewUrl('https://via.placeholder.com/150');
+      } else if (typeof currentUser.profileImage === 'string') {
+        setPreviewUrl(currentUser.profileImage);
+      } else if (currentUser.profileImage instanceof File) {
+        setPreviewUrl(URL.createObjectURL(currentUser.profileImage));
+      }
+    }
+  }, [isOpen, currentUser]);
 
   if (!isOpen) return null;
 

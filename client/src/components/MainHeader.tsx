@@ -25,6 +25,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Logout from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import { VALID_PATHS } from '../constants/paths';
 
 const MainHeader: React.FC = () => {
     const navigate = useNavigate(); // Hook for navigation
@@ -52,13 +53,24 @@ const MainHeader: React.FC = () => {
         navigate("/Login");
     }
 
+    // Handles dynamic navigation for the user's choice, (Options is to pass a specific state to the router: for example the logged user's id to the profile page)
+    const handleNavigationToPages = (navigateTo: string, options?: { state?: any}) => {
+        // if the given path doesnt exist (or isnt valid) - do nothing
+        if (!(VALID_PATHS.includes(navigateTo))) {
+            return;
+        }
+
+        handleMenuClose();
+        navigate(navigateTo, options);
+    }
+
     return (
         <AppBar position="static" color="inherit" elevation={1} sx={{ borderBottom: '1px solid #e0e0e0' }}>
         <Container maxWidth="xl">
             <Toolbar disableGutters sx={{ minHeight: '64px', justifyContent: 'space-between' }}>
             
             <Stack direction="row" alignItems="center" spacing={1} sx={{ cursor: 'pointer' }}>
-                <CookingReviewLogo />
+                <CookingReviewLogo onClick={() => handleNavigationToPages("/")} />
             </Stack>
 
             <Box 
@@ -162,17 +174,17 @@ const MainHeader: React.FC = () => {
                                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                             >
 
-                                <MenuItem onClick={handleMenuClose}>
+                                <MenuItem onClick={() => handleNavigationToPages("/Profile")}>
                                     <Avatar src={`${user?.profileImage}`} /> <b>{user?.username}</b>
                                 </MenuItem>
                                 <Divider/>
 
-                                <MenuItem onClick={handleMenuClose}>
+                                <MenuItem onClick={() => handleNavigationToPages("/Profile", { state: { editMode: true } })}>
                                     <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
                                     Profile Settings
                                 </MenuItem>
                                 
-                                <MenuItem onClick={handleMenuClose}>
+                                <MenuItem onClick={() => handleNavigationToPages("/Profile")}>
                                     <ListItemIcon><ReceiptLongIcon fontSize="small" /></ListItemIcon>
                                     My Posts
                                 </MenuItem>

@@ -3,15 +3,27 @@ import { PostType } from "../../types/post";
 import { UserProfileProps, UserType } from "../../types/user";
 import { styles } from './UserProfile.styles';
 import { EditProfileModal } from "../../components/EditProfile/EditProfile";
+import { useLocation } from "react-router-dom";
 
 export const UserProfile: React.FC<UserProfileProps> = ({ profileUserId, loggedInUserId }) => {
+  const location = useLocation();
   const [userData, setUserData] = useState<UserType | null>(null);
   const [posts, setPosts] = useState<PostType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-
   const isOwnProfile = profileUserId === loggedInUserId;
+
+  // Catch navigation state to open edit modal
+  useEffect(() => {
+    // Check if the router passed 'editMode: true' AND that it's actually their profile
+    if (location.state?.editMode && isOwnProfile) {
+      setIsEditModalOpen(true);
+      
+      // Clear the router state so if the user refreshes the page, the modal doesn't get stuck open
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, isOwnProfile]);
 
   useEffect(() => {
     const fetchProfileData = async () => {
