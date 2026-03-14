@@ -39,7 +39,7 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
     // Update the image if a new file was uploaded
     if (imageFile) {      
       // imageFile.path contains the URL (if using Cloudinary) or local path (if using disk storage)
-      user.profileImageUrl = imageFile.path; 
+      user.profileImageUrl = `/uploads/${imageFile.fieldname}`; 
     }
 
     await user.save();

@@ -68,6 +68,17 @@ const MainHeader: React.FC = () => {
         navigate(navigateTo, options);
     }
 
+    const getAvatarUrl = (path: any) => {
+        if (!path || typeof path !== 'string') return undefined;
+        if (path.startsWith('http')) return path; // Allows Google Auth or external links to work
+        
+        // Clean out "public/" and format the string
+        let cleanPath = path.replace(/^\\?public[\\/]?/, '/').replace(/^\/public\//, '/');
+        if (!cleanPath.startsWith('/')) cleanPath = `/${cleanPath}`;
+                
+        return `http://localhost:3000${cleanPath}`;
+    };
+
     return (
         <AppBar position="static" color="inherit" elevation={1} sx={{ borderBottom: '1px solid #e0e0e0' }}>
         <Container maxWidth="xl">
@@ -143,7 +154,7 @@ const MainHeader: React.FC = () => {
                                 aria-expanded={open ? 'true' : undefined}
                             >
                                 <Avatar
-                                    src={typeof user?.profileImageUrl === 'string' ? user.profileImageUrl : undefined}
+                                    src={getAvatarUrl(user?.profileImageUrl)}
                                     alt={user?.username || 'User'}
                                     sx={{ width: 40, height: 40, bgcolor: '#004d40'}}
                                 >
@@ -179,7 +190,7 @@ const MainHeader: React.FC = () => {
                             >
 
                                 <MenuItem onClick={() => handleNavigationToPages("/profile")}>
-                                    <Avatar src={`${user?.profileImageUrl}`} /> <b>{user?.username}</b>
+                                    <Avatar src={getAvatarUrl(user?.profileImageUrl)} /> <b>{user?.username}</b>
                                 </MenuItem>
                                 <Divider/>
 
