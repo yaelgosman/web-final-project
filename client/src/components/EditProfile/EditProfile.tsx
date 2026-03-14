@@ -29,7 +29,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ currentUser,
         setPreviewUrl(URL.createObjectURL(currentUser.profileImageUrl));
       }
     }
-  }, [isOpen, currentUser]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -54,7 +54,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ currentUser,
     
     await onSave({
       username,
-      ...(selectedFile && { profileImage: selectedFile })
+      ...(selectedFile && { profileImageUrl: selectedFile })
     });
     
     setIsSubmitting(false);

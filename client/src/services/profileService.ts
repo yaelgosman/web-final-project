@@ -15,10 +15,11 @@ export const fetchPostsByUserId = async (userId: string): Promise<PostType[]> =>
 };
 
 // Updates the user profile details
-export const updateUserProfile = async (userId: string, formData: FormData): Promise<UserType> => {
-    const response = await apiClient.put<UserType>(`/api/users/profile`, formData, {
+export const updateUserProfile = async (userId: string, formData: FormData) => {
+    const response = await apiClient.put(`/api/users/profile`, formData, {
         headers: {
-            'Content-Type': 'multipart/form-data', 
+            // This overrides the global 'application/json' in your apiClient.ts
+            'Content-Type': 'multipart/form-data' 
         },
     });
     return response.data;

@@ -208,10 +208,18 @@ export const UserProfile: React.FC = () => {
     }
   };
 
+  const getImageUrl = (imagePath?: string) => {
+    if (!imagePath) return 'https://via.placeholder.com/150'; // Fallback
+    if (imagePath.startsWith('http')) return imagePath; // Already a full URL (like Google Auth or placeholders)
+    
+    // It's a local upload, so prepend your backend server URL
+    return `http://localhost:3000${imagePath}`; 
+};
+
   // Helper to safely render the profile image whether it's a URL string or a File object
   const getProfileImageUrl = (image?: string | File) => {
     if (!image) return 'https://via.placeholder.com/150'; // Default fallback
-    if (typeof image === 'string') return image;
+    if (typeof image === 'string') return getImageUrl(image);
     return URL.createObjectURL(image);
   };
 
