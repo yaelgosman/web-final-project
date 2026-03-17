@@ -9,12 +9,12 @@ export interface ILike extends Document {
 const likeSchema = new Schema<ILike>(
   {
     postId: {
-      type: Schema.Types.ObjectId,
+      type: Types.ObjectId,
       ref: "Post",
       required: true,
     },
     userId: {
-      type: Schema.Types.ObjectId,
+      type: Types.ObjectId,
       ref: "User",
       required: true,
     },
@@ -26,5 +26,6 @@ const likeSchema = new Schema<ILike>(
 
 // prevent duplicate likes
 likeSchema.index({ postId: 1, userId: 1 }, { unique: true });
+likeSchema.index({ postId: 1 });
 
 export default model<ILike>("Like", likeSchema);
