@@ -3,15 +3,35 @@ import Post from "../models/postModel";
 import { AuthRequest } from "../middlewares/authMiddleware";
 
 export const createPost = async (req: AuthRequest, res: Response) => {
-  const { restaurant, rating, text, imagePath } = req.body;
-  const post = await Post.create({
-    userId: req.userId,
-    restaurant,
-    rating,
-    text,
-    imagePath,
-  });
-  res.json(post);
+  const { rating, text } = req.body;
+  
+  // parse the restaurant string back into an object
+  let parsedRestaurant;
+  try {
+    // Check if it's a string (FormData) and parse it. 
+    // The fallback allows standard JSON requests to still work during API testing.
+    parsedRestaurant = typeof req.body.restaurant === 'string' 
+      ? JSON.parse(req.body.restaurant) 
+      : req.body.restaurant;
+  } catch (error) {
+    return res.status(400).json({ error: "Invalid restaurant data format" });
+  }
+    
+  const imagePath = req.file ? req.file.path : req.body.imagePath;
+
+  try {
+    const post = await Post.create({
+      userId: req.userId,
+      restaurant: parsedRestaurant,
+      rating: Number(rating),
+      text,
+      imagePath,
+    });
+    res.status(201).json(post);
+  } catch (error) {
+    console.error("Database save error:", error);
+    res.status(500).json({ error: "Failed to save post" });
+  }
 };
 
 export const getPosts = async (req: Request, res: Response) => {
