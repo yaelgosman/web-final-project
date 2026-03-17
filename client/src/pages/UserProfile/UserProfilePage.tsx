@@ -7,6 +7,7 @@ import { useLocation, useParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { updateUserProfile } from '../../services/profileService';
 import { fetchUserById, fetchPostsByUserId } from '../../services/profileService';
+import UserPost from "../../components/UserPosts/userPost";
 
 export const UserProfile: React.FC = () => {
   const location = useLocation();
@@ -128,56 +129,6 @@ export const UserProfile: React.FC = () => {
     setIsEditModalOpen(true);
   };
 
-//   const handleSaveProfile = async (updatedData: Partial<UserType>) => {
-//   // if (!userData?._id) return; //TODO: uncomment later - this is so it will update locally before implementation of server logic
-
-//   try {
-//     const formData = new FormData();
-
-//     if (updatedData.username) {
-//       formData.append('username', updatedData.username);
-//     }
-
-//     // We check if it's an instance of File to ensure we aren't appending a string URL
-//     if (updatedData.profileImage instanceof File) {
-//       formData.append('profileImage', updatedData.profileImage);
-//     }
-
-//     // Send the request to the backend
-    
-//     /* Example fetch request:
-//     const response = await fetch(`http://localhost:5000/api/users/${userData._id}`, {
-//       method: 'PUT', // or PATCH depending on your API
-//       body: formData,
-//       // headers: {
-//       //   Authorization: `Bearer ${yourAuthToken}` // Add auth headers if needed
-//       // }
-//     });
-
-//     if (!response.ok) throw new Error('Failed to update profile');
-    
-//     // Typically, your server will respond with the updated user object containing the new image URL
-//     const updatedUserFromServer = await response.json();
-//     */
-
-//     // Update local UI state
-//     // If you use the fetch request above, you would do: setUserData(updatedUserFromServer)
-    
-//     setUserData(prev => {
-//       if (!prev) return prev;
-//       return {
-//         ...prev,
-//         username: updatedData.username || prev.username,
-//         profileImage: updatedData.profileImage || prev.profileImage
-//       };
-//     });
-
-//   } catch (error) {
-//     console.error("Error updating profile:", error);
-//     // TODO: Add error handling UI, like a toast notification
-//   }
-// };
-
   const handleSaveProfile = async (updatedData: Partial<UserType>) => {
     // Prevent execution if we don't have the user's ID
     if (!userData?._id) return; 
@@ -228,7 +179,15 @@ export const UserProfile: React.FC = () => {
     return URL.createObjectURL(image);
   };
 
-  
+  const handleEditPost = (postId: string) => {
+    console.log("Edit button clicked for post ID:", postId);
+    // TODO: implement later
+  };
+
+  const handleDeletePost = (postId: string) => {
+    console.log("Delete button clicked for post ID:", postId);
+    // TODO: implement later
+  };
 
   if (isLoading || !userData) {
     return <div style={{ textAlign: 'center', padding: '50px' }}>Loading profile...</div>;
@@ -278,19 +237,7 @@ export const UserProfile: React.FC = () => {
           ) : (
             posts.map((post) => (
               <div key={post._id} style={styles.gridItem}>
-                {post.imagePath ? (
-                  <img src={getImageUrl(post.imagePath)} alt={post.restaurant.name} style={styles.reviewImage} />
-                ) : (
-                  <div style={styles.noImagePlaceholder}>
-                    <p>No Image Provided</p>
-                  </div>
-                )}
-                
-                <div style={styles.reviewOverlay}>
-                  <span style={styles.rating}>{'🟢'.repeat(post.rating)}{'⚪'.repeat(5 - post.rating)}</span>
-                  <p style={styles.restaurantName}>{post.restaurant.name}</p>
-                  <p style={styles.restaurantCity}>{post.restaurant.city}</p>
-                </div>
+                <UserPost post={post} getImageUrl={getImageUrl} onEdit={handleEditPost} onDelete={handleDeletePost} />
               </div>
             )
           ))}
