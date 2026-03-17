@@ -279,7 +279,7 @@ export const UserProfile: React.FC = () => {
             posts.map((post) => (
               <div key={post._id} style={styles.gridItem}>
                 {post.imagePath ? (
-                  <img src={post.imagePath} alt={post.restaurant.name} style={styles.reviewImage} />
+                  <img src={getImageUrl(post.imagePath)} alt={post.restaurant.name} style={styles.reviewImage} />
                 ) : (
                   <div style={styles.noImagePlaceholder}>
                     <p>No Image Provided</p>

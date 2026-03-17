@@ -1,1 +1,1 @@
-export const VALID_PATHS = ["*" ,"/", "/login", "/register", "/profile"];
+export const VALID_PATHS = ["*" ,"/", "/login", "/register", "/profile", "/addReview"];

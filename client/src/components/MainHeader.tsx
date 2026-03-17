@@ -116,7 +116,9 @@ const MainHeader: React.FC = () => {
                 Discover
                 </Button>
 
-                <Button color="inherit" sx={{ textTransform: 'none', fontWeight: 600, display: { xs: 'none', md: 'flex' } }}>
+                <Button 
+                    onClick={() => handleNavigationToPages('/addReview')}
+                    color="inherit" sx={{ textTransform: 'none', fontWeight: 600, display: { xs: 'none', md: 'flex' } }}>
                 Review
                 </Button>
                 
