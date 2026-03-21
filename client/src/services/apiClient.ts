@@ -45,7 +45,7 @@ apiClient.interceptors.response.use(
                 const { accessToken, refreshToken: newRefreshToken } = res.data;
 
                 // update the storage
-                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('token', accessToken);
                 localStorage.setItem('refreshToken', newRefreshToken);
 
                 // update the header and retry the original request

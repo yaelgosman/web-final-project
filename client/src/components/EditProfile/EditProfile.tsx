@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { UserType } from '../../types/user'; 
 import { modalStyles } from './EditProfile.styles';
+import { getImageUrl } from '../../utils/imageUtils';
 
 interface EditProfileModalProps {
   currentUser: UserType;
@@ -24,7 +25,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ currentUser,
       if (!currentUser.profileImageUrl) {
         setPreviewUrl('https://via.placeholder.com/150');
       } else if (typeof currentUser.profileImageUrl === 'string') {
-        setPreviewUrl(currentUser.profileImageUrl);
+        setPreviewUrl(getImageUrl(currentUser.profileImageUrl));
       } else if (currentUser.profileImageUrl instanceof File) {
         setPreviewUrl(URL.createObjectURL(currentUser.profileImageUrl));
       }
