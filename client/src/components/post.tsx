@@ -26,6 +26,8 @@ import CircleIcon from '@mui/icons-material/Circle';
 import CloseIcon from '@mui/icons-material/Close';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import type { PostType } from '../types/post';
+import { getImageUrl } from '../utils/imageUtils';
+import CommentsSection from './PostComment/CommentSection';
 
 interface PostProps {
   post: PostType;
@@ -34,6 +36,8 @@ interface PostProps {
 const Post: React.FC<PostProps> = ({ post }) => {
   const [open, setOpen] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+
+  // TODO: Add comments count (either from the parent component or fetch here the comments this post)
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -49,7 +53,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
     // TODO: in the future add the rest of the logic to actually save it for the logged user
   }
 
-  const displayImage = post.imagePath || "https://via.placeholder.com/600x400?text=No+Image";
+  const displayImage = getImageUrl(post.imagePath) || "https://upload.wikimedia.org/wikipedia/commons/a/a3/Image-not-found.png?_=20210521171500";
 
   return (
     <>
@@ -175,7 +179,10 @@ const Post: React.FC<PostProps> = ({ post }) => {
           </IconButton>
         </DialogTitle>
         <Divider />
-        <DialogContent>
+
+        <CommentsSection postId={post._id} />
+
+        {/* <DialogContent>
           <List>
             <ListItem alignItems="flex-start">
                <ListItemText 
@@ -183,7 +190,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
                />
             </ListItem>
           </List>
-        </DialogContent>
+        </DialogContent> */}
       </Dialog>
     </>
   );

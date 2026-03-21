@@ -3,16 +3,19 @@ import { PostType } from "../../types/post";
 import { UserProfileProps, UserType } from "../../types/user";
 import { styles } from './UserProfile.styles';
 import { EditProfileModal } from "../../components/EditProfile/EditProfile";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { updateUserProfile } from '../../services/profileService';
 import { fetchUserById, fetchPostsByUserId } from '../../services/profileService';
-import { BASE_URL } from '../../constants/server';
+import UserPost from "../../components/UserPosts/UserPost.tsx";
+import { getImageUrl } from "../../utils/imageUtils";
+import postService from "../../services/postService";
 
 export const UserProfile: React.FC = () => {
   const location = useLocation();
-  const { id } = useParams<{ id: string }>(); // Gets the :id from the URL
-  const { user: loggedInUser, updateUser } = useAuth(); // Gets the logged-in user from the Auth context
+  const navigate = useNavigate();
+  const { id } = useParams<{ id : string }>(); // Gets the :id from the URL
+  const { user: loggedInUser } = useAuth(); // Gets the logged-in user from the Auth context
   const [userData, setUserData] = useState<UserType | null>(null);
   const [posts, setPosts] = useState<PostType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -36,84 +39,35 @@ export const UserProfile: React.FC = () => {
     }
   }, [location.state, isOwnProfile]);
 
-  // useEffect(() => {
-  //   if (!profileUserId) return; // Wait until we have an ID
-
-  //   const fetchProfileData = async () => {
-  //     setIsLoading(true);
-  //     setError(null);
-
-  //     // Mock data injection matching your types
-  //     setUserData({
-  //       _id: profileUserId,
-  //       username: 'Ofir',
-  //       email: 'user@example.com',
-  //       provider: 'local',
-  //       profileImage: 'https://thumbs.dreamstime.com/b/default-avatar-profile-vector-user-profile-default-avatar-profile-vector-user-profile-profile-179376714.jpg', 
-  //       createdAt: new Date().toISOString()
-  //     });
-
-  //     setPosts([
-  //       { 
-  //         _id: '1', 
-  //         userId: profileUserId, 
-  //         restaurant: { name: 'Trattoria Bella', city: 'Rome' }, 
-  //         rating: 5, 
-  //         text: 'Best carbonara ever!',
-  //         imagePath: 'https://static.toiimg.com/thumb/53784736.cms?imgsize=51659&width=800&height=800',
-  //         createdAt: new Date().toISOString(),
-  //         updatedAt: new Date().toISOString()
-  //       },
-  //       { 
-  //         _id: '2', 
-  //         userId: profileUserId, 
-  //         restaurant: { name: 'The Grind Cafe', city: 'Tel Aviv' }, 
-  //         rating: 4, 
-  //         imagePath: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRukVq3uaqVuS9RRUzaByz6y1CjWDF485z92Q&s',
-  //         text: 'Great espresso, but limited seating.',
-  //         createdAt: new Date().toISOString(),
-  //         updatedAt: new Date().toISOString()
-  //       },
-  //     ]);
-
-  //     setIsLoading(false);
-  //   };
-
-  //   fetchProfileData();
-  // }, [profileUserId]);
-
   useEffect(() => {
     if (!profileUserId) return;
 
     let isMounted = true;
 
-    const fetchProfileData = async () => {
-      setIsLoading(true);
-      setError(null);
+  const fetchProfileData = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Use Promise.all to fetch the user and posts at the same time using your Axios service
+      const [userDataResult, postsDataResult] = await Promise.all([
+        fetchUserById(profileUserId),
+        fetchPostsByUserId(profileUserId)
+      ]);
 
-      try {
-        // Use Promise.all to fetch the user and posts at the same time using your Axios service
-        const [userDataResult, postsDataResult] = await Promise.all([
-          fetchUserById(profileUserId),
-          fetchPostsByUserId(profileUserId)
-        ]);
-
-        console.log(`user data result: `, userDataResult);
-
-        // Only update state if the component is still mounted
-        if (isMounted) {
-          setUserData(userDataResult);
-          setPosts(postsDataResult);
-        }
-      } catch (err) {
-        if (isMounted) {
-          console.error("Error loading profile:", err);
-          setError("Could not load profile data.");
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+      // Only update state if the component is still mounted
+      if (isMounted) {
+        setUserData(userDataResult);
+        setPosts(postsDataResult);
+      }
+    } catch (err) {
+      if (isMounted) {
+        console.error("Error loading profile:", err);
+        setError("Could not load profile data.");
+      }
+    } finally {
+      if (isMounted) {
+        setIsLoading(false);
       }
     };
 
@@ -128,56 +82,6 @@ export const UserProfile: React.FC = () => {
   const handleEditProfile = () => {
     setIsEditModalOpen(true);
   };
-
-  //   const handleSaveProfile = async (updatedData: Partial<UserType>) => {
-  //   // if (!userData?._id) return; //TODO: uncomment later - this is so it will update locally before implementation of server logic
-
-  //   try {
-  //     const formData = new FormData();
-
-  //     if (updatedData.username) {
-  //       formData.append('username', updatedData.username);
-  //     }
-
-  //     // We check if it's an instance of File to ensure we aren't appending a string URL
-  //     if (updatedData.profileImage instanceof File) {
-  //       formData.append('profileImage', updatedData.profileImage);
-  //     }
-
-  //     // Send the request to the backend
-
-  //     /* Example fetch request:
-  //     const response = await fetch(`http://localhost:5000/api/users/${userData._id}`, {
-  //       method: 'PUT', // or PATCH depending on your API
-  //       body: formData,
-  //       // headers: {
-  //       //   Authorization: `Bearer ${yourAuthToken}` // Add auth headers if needed
-  //       // }
-  //     });
-
-  //     if (!response.ok) throw new Error('Failed to update profile');
-
-  //     // Typically, your server will respond with the updated user object containing the new image URL
-  //     const updatedUserFromServer = await response.json();
-  //     */
-
-  //     // Update local UI state
-  //     // If you use the fetch request above, you would do: setUserData(updatedUserFromServer)
-
-  //     setUserData(prev => {
-  //       if (!prev) return prev;
-  //       return {
-  //         ...prev,
-  //         username: updatedData.username || prev.username,
-  //         profileImage: updatedData.profileImage || prev.profileImage
-  //       };
-  //     });
-
-  //   } catch (error) {
-  //     console.error("Error updating profile:", error);
-  //     // TODO: Add error handling UI, like a toast notification
-  //   }
-  // };
 
   const handleSaveProfile = async (updatedData: Partial<UserType>) => {
     // Prevent execution if we don't have the user's ID
@@ -214,27 +118,32 @@ export const UserProfile: React.FC = () => {
     }
   };
 
-  const getImageUrl = (imagePath?: string) => {
-    if (!imagePath) return 'https://via.placeholder.com/150'; // Default avatar
-    if (imagePath.startsWith('http')) return imagePath; // Google Auth or external URLs
-
-    // Clean up the path just in case "public" is stuck in your DB from earlier
-    let cleanPath = imagePath.replace(/^\\?public[\\/]/, '/').replace(/^\/public\//, '/');
-
-    // Ensure it starts with a slash
-    if (!cleanPath.startsWith('/')) cleanPath = `/${cleanPath}`;
-
-    return `${BASE_URL}${cleanPath}`;
-  };
-
   // Helper to safely render the profile image whether it's a URL string or a File object
-  const getprofileImagePath = (image?: string | File) => {
-    if (!image) return 'https://via.placeholder.com/150'; // Default fallback
+  const getProfileImageUrl = (image?: string | File) => {
+    if (!image) return 'https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-portrait-176256935.jpg'; // Default fallback
     if (typeof image === 'string') return getImageUrl(image);
     return URL.createObjectURL(image);
   };
 
+  const handleEditPost = (post: PostType) => {
+    navigate('/editReview', { state: { postToEdit: post }});
+  };
 
+  const handleDeletePost = async (postId: string) => {
+    // Asks the user to confirm their deletion // TODO: replace with a proper Popup
+    const isConfirmed = window.confirm("Are you sure you want to delete this review? This cannot be undone.");
+    if (!isConfirmed) return;
+
+    try {
+      await postService.deletePost(postId);
+
+      // Updates the UI instantly after the deletion of the selected Review by removing it from the state
+      setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
+    } catch (err) {
+      console.error("Failed to delete post: ", err);
+      alert("There was an error deleting your review. Please try again.");
+    }
+  };
 
   if (isLoading || !userData) {
     return <div style={{ textAlign: 'center', padding: '50px' }}>Loading profile...</div>;
@@ -284,19 +193,7 @@ export const UserProfile: React.FC = () => {
           ) : (
             posts.map((post) => (
               <div key={post._id} style={styles.gridItem}>
-                {post.imagePath ? (
-                  <img src={post.imagePath} alt={post.restaurant.name} style={styles.reviewImage} />
-                ) : (
-                  <div style={styles.noImagePlaceholder}>
-                    <p>No Image Provided</p>
-                  </div>
-                )}
-
-                <div style={styles.reviewOverlay}>
-                  <span style={styles.rating}>{'🟢'.repeat(post.rating)}{'⚪'.repeat(5 - post.rating)}</span>
-                  <p style={styles.restaurantName}>{post.restaurant.name}</p>
-                  <p style={styles.restaurantCity}>{post.restaurant.city}</p>
-                </div>
+                <UserPost post={post} getImageUrl={getImageUrl} onEdit={() => handleEditPost(post)} onDelete={handleDeletePost} />
               </div>
             )
             ))}

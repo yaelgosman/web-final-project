@@ -6,38 +6,35 @@ import fs from "fs";
 import path from "path";
 import mongoose from "mongoose";
 
-// GET /api/posts - Get all posts with pagination
-export const getPosts = async (req: Request, res: Response) => {
+export const createPost = async (req: AuthRequest, res: Response) => {
+  const { rating, text } = req.body;
+  
+  // parse the restaurant string back into an object
+  let parsedRestaurant;
   try {
-    const { userId, page = 1, limit = 10 } = req.query;
+    // Check if it's a string (FormData) and parse it. 
+    // The fallback allows standard JSON requests to still work during API testing.
+    parsedRestaurant = typeof req.body.restaurant === 'string' 
+      ? JSON.parse(req.body.restaurant) 
+      : req.body.restaurant;
+  } catch (error) {
+    return res.status(400).json({ error: "Invalid restaurant data format" });
+  }
+    
+  const imagePath = req.file ? req.file.path : req.body.imagePath;
 
-    const filter: any = {};
-    if (userId) {
-      filter.userId = userId;
-    }
-
-    const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
-
-    const posts = await Post.find(filter)
-      .populate("userId", "username profileImagePath")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(parseInt(limit as string));
-
-    const total = await Post.countDocuments(filter);
-
-    res.status(200).json({
-      data: posts,
-      pagination: {
-        current: parseInt(page as string),
-        limit: parseInt(limit as string),
-        total,
-        pages: Math.ceil(total / parseInt(limit as string)),
-      },
+  try {
+    const post = await Post.create({
+      userId: req.userId,
+      restaurant: parsedRestaurant,
+      rating: Number(rating),
+      text,
+      imagePath,
     });
-  } catch (error: any) {
-    console.error("Get posts error:", error);
-    res.status(500).json({ error: "Failed to fetch posts" });
+    res.status(201).json(post);
+  } catch (error) {
+    console.error("Database save error:", error);
+    res.status(500).json({ error: "Failed to save post" });
   }
 };
 
@@ -120,75 +117,33 @@ export const createPost = async (req: AuthRequest, res: Response) => {
 
 // PUT /api/posts/:id - Update a post
 export const updatePost = async (req: AuthRequest, res: Response) => {
-  try {
-    const postId = req.params.id;
-    const userId = req.userId;
+  try {    
+    const { id } = req.params;
+    const post = await Post.findById(id);
+    if (!post) return res.status(404).json({ error: "Post not found" });
+    if (post.userId.toString() !== req.userId)
+      return res.status(403).json({ error: "Forbidden" });
 
-    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(401).json({ error: "Invalid or missing authentication" });
-    }
-    const { restaurant, rating, text, imagePath } = req.body;
+    // Update text and rating if they exist
+    if (req.body?.text) post.text = req.body.text;
+    if (req.body?.rating) post.rating = Number(req.body.rating);
 
-    const post = await Post.findById(postId);
-
-    if (!post) {
-      return res.status(404).json({ error: "Post not found" });
-    }
-
-    // Verify ownership
-    if (post.userId.toString() !== userId) {
-      return res.status(403).json({ error: "Not authorized to update this post" });
+    // Parse and update the restaurant object safely
+    if (req.body?.restaurant) {
+      post.restaurant = typeof req.body.restaurant === 'string'
+        ? JSON.parse(req.body.restaurant)
+        : req.body.restaurant;
     }
 
-    // Update restaurant info
-    if (restaurant?.name) {
-      post.restaurant.name = restaurant.name.trim();
-    }
-    if (restaurant?.city) {
-      post.restaurant.city = restaurant.city.trim();
-    }
-    if (restaurant?.cuisine !== undefined) {
-      post.restaurant.cuisine = restaurant.cuisine?.trim() || null;
-    }
-
-    // Update rating
-    if (rating) {
-      if (rating < 1 || rating > 5) {
-        return res.status(400).json({ error: "Rating must be between 1 and 5" });
-      }
-      post.rating = parseInt(rating);
-    }
-
-    // Update text
-    if (text) {
-      if (text.trim().length === 0) {
-        return res.status(400).json({ error: "Text cannot be empty" });
-      }
-      post.text = text.trim();
-    }
-
-    // Update image
-    if (imagePath) {
-      // Delete old image if new one is provided
-      if (post.imagePath) {
-        const oldImagePath = path.join("public", post.imagePath);
-        if (fs.existsSync(oldImagePath)) {
-          try {
-            fs.unlinkSync(oldImagePath);
-          } catch (err) {
-            console.error("Failed to delete old image:", err);
-          }
-        }
-      }
-      post.imagePath = imagePath;
+    // Update the image path ONLY if a new file was uploaded
+    if (req.file) {
+      post.imagePath = req.file.path;
     }
 
     await post.save();
-    await post.populate("userId", "username profileImagePath");
-
-    res.status(200).json(post);
-  } catch (error: any) {
-    console.error("Update post error:", error);
+    res.json(post);
+  } catch (error) {
+    console.error("Error updating post:", error);
     res.status(500).json({ error: "Failed to update post" });
   }
 };

@@ -82,39 +82,68 @@ const MainHeader: React.FC = () => {
 
     return (
         <AppBar position="static" color="inherit" elevation={1} sx={{ borderBottom: '1px solid #e0e0e0' }}>
-            <Container maxWidth="xl">
-                <Toolbar disableGutters sx={{ minHeight: '64px', justifyContent: 'space-between' }}>
+        <Container maxWidth="xl">
+            <Toolbar disableGutters sx={{ minHeight: '64px', justifyContent: 'space-between' }}>
+            
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ cursor: 'pointer' }}>
+                <CookingReviewLogo onClick={() => handleNavigationToPages("/")} />
+            </Stack>
 
-                    <Stack direction="row" alignItems="center" spacing={1} sx={{ cursor: 'pointer' }}>
-                        <CookingReviewLogo onClick={() => handleNavigationToPages("/")} />
-                    </Stack>
+            <Box 
+                sx={{ 
+                display: { xs: 'none', md: 'flex' },
+                alignItems: 'center',
+                backgroundColor: '#fff',
+                border: '1px solid #e0e0e0',
+                borderRadius: '24px',
+                px: 2,
+                py: 0.5,
+                width: '400px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                '&:hover': { boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }
+                }}
+            >
+                <SearchIcon sx={{ color: '#666', mr: 1 }} />
+                <InputBase
+                placeholder="Search"
+                sx={{ flex: 1, fontSize: '0.95rem' }}
+                />
+            </Box>
 
-                    <Box
-                        sx={{
-                            display: { xs: 'none', md: 'flex' },
-                            alignItems: 'center',
-                            backgroundColor: '#fff',
-                            border: '1px solid #e0e0e0',
-                            borderRadius: '24px',
-                            px: 2,
-                            py: 0.5,
-                            width: '400px',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-                            '&:hover': { boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }
-                        }}
-                    >
-                        <SearchIcon sx={{ color: '#666', mr: 1 }} />
-                        <InputBase
-                            placeholder="Search"
-                            sx={{ flex: 1, fontSize: '0.95rem' }}
-                        />
-                    </Box>
+            {/* Navigation Actions */}
+            <Stack direction="row" alignItems="center" spacing={1}>
+                
+                <Button color="inherit" sx={{ textTransform: 'none', fontWeight: 600, display: { xs: 'none', md: 'flex' } }}>
+                Discover
+                </Button>
 
-                    {/* Navigation Actions */}
-                    <Stack direction="row" alignItems="center" spacing={1}>
+                <Button 
+                    onClick={() => handleNavigationToPages('/addReview')}
+                    color="inherit" sx={{ textTransform: 'none', fontWeight: 600, display: { xs: 'none', md: 'flex' } }}>
+                Review
+                </Button>
+                
+                <Stack direction="row" spacing={0.5}>
+                <IconButton><NotificationsNoneIcon /></IconButton>
+                </Stack>
 
-                        <Button color="inherit" sx={{ textTransform: 'none', fontWeight: 600, display: { xs: 'none', md: 'flex' } }}>
-                            Discover
+                {
+                    !isAuthenticated ?  (
+                        // if not logged in - show the 'sign in' button
+                        <Button 
+                            variant="contained" 
+                            sx={{ 
+                                bgcolor: '#000', 
+                                color: '#fff', 
+                                borderRadius: '20px', 
+                                textTransform: 'none',
+                                fontWeight: 'bold',
+                                px: 3,
+                                '&:hover': { bgcolor: '#333' }
+                            }}
+                            onClick={handleSignIn}
+                        >
+                            Sign in
                         </Button>
 
                         <Button color="inherit" sx={{ textTransform: 'none', fontWeight: 600, display: { xs: 'none', md: 'flex' } }}>
