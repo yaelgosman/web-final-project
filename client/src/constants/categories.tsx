@@ -13,7 +13,8 @@ export interface Category {
 }
 
 export const CATEGORIES = [
-  { id: 'fine_dining', label: "Fine Dining", icon: <RestaurantIcon/> },
+  { id: 'all', label: 'All', icon: <RestaurantIcon /> },
+  { id: 'fine_dining', label: "Fine Dining", icon: <RestaurantIcon /> },
   { id: 'informal', label: "Informal Meals", icon: <LocalDiningIcon /> },
   { id: 'hidden_gems', label: "Hidden Gems", icon: <DiamondIcon /> },
   { id: 'date_night', label: "Date Night", icon: <FavoriteBorderIcon /> },

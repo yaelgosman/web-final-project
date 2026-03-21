@@ -3,14 +3,14 @@ import { UserType } from '../types/user';
 
 interface AuthContextType {
     user: UserType | null;
-    login: (userData: UserType, token: string) => void;
+    login: (userData: UserType, token: string, refreshToken?: string) => void;
     logout: () => void;
     isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<UserType | null>(null);
 
     // Checks localStorage on initial load to keep the user logged in
@@ -18,24 +18,35 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) => {
         const storedUser = localStorage.getItem('user');
         const token = localStorage.getItem('token');
 
-        if (storedUser && token) {
-            setUser(JSON.parse(storedUser));
+        if (storedUser && storedUser !== "undefined" && token) {
+            try {
+                setUser(JSON.parse(storedUser));
+            } catch (error) {
+                console.error("Failed to parse user", error);
+                logout(); // אם המידע פגום, ננקה הכל
+            }
         }
     }, []);
 
-    const login = (userData: UserType, token: string) => {
-        // First we save the new state for the UI to react immidiately on login
+    const login = (userData: UserType, token: string, refreshToken?: string) => {
+        if (!userData) return;
         setUser(userData);
 
         // Then we save to the localStorage for persistence on refresh
         localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('token', token);        
+        localStorage.setItem('token', token);
+
+        if (refreshToken) {
+            localStorage.setItem('refreshToken', refreshToken);
+        }
     };
 
     const logout = () => {
         setUser(null); // First sets the user state for the UI to react immidiately on logout
         localStorage.removeItem('user');
         localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+
     };
 
     return (
