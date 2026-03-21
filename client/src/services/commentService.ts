@@ -9,7 +9,7 @@ const POSTS_API_URL = '/api/posts';
  * Assuming your backend route is something like: GET /posts/:postId/comments
  */
 export const getCommentsByPost = async (postId: string): Promise<CommentType[]> => {
-  const response = await apiClient.get<CommentType[]>(`${POSTS_API_URL}/${postId}/comments`);
+  const response = await apiClient.get<CommentType[]>(`${COMMENTS_API_URL}/${postId}`);
   return response.data;
 };
 

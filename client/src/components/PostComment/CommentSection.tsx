@@ -20,6 +20,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getImageUrl } from '../../utils/imageUtils';
 import * as styles from './CommentSection.style';
 import { CommentType } from '../../types/comment';
+import commentService from '../../services/commentService';
 
 interface CommentsSectionProps {
   postId: string;
@@ -32,20 +33,43 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
 
   useEffect(() => {
-    // TODO: commentService.getCommentsByPost(postId)
-    console.log(`Fetching comments for post: ${postId}`);
+    const fetchComments = async () => {
+      try {
+        const data = await commentService.getCommentsByPost(postId);
+        setComments(data);
+      } catch (error) {
+        console.error("Failed to fetch comments:", error);
+      }
+    };
+    fetchComments();
   }, [postId]);
 
   const handleSubmitComment = async () => {
     if (!commentText.trim()) return;
 
-    if (editingCommentId) {
-      console.log(`Editing comment ${editingCommentId} to: ${commentText}`);
-      setEditingCommentId(null);
-    } else {
-      console.log(`Adding new comment to post ${postId}: ${commentText}`);
+    try {
+      if (editingCommentId) {
+        // Edit
+        const updatedComment = await commentService.editComment(editingCommentId, commentText);
+        
+        // Update local state by replacing the old comment with the new one
+        setComments((prev) => 
+          prev.map((c) => (c._id === editingCommentId ? updatedComment : c))
+        );
+        setEditingCommentId(null);
+
+      } else {
+        // Create
+        const newComment = await commentService.createComment(postId, commentText);
+        
+        // Adds the new comment to the bottom of the list instantly
+        setComments((prev) => [...prev, newComment]);
+      }
+      setCommentText("");
+    } catch (error) {
+      console.error("Failed to post comment:", error);
+      alert("Something went wrong while posting your comment.");
     }
-    setCommentText("");
   };
 
   const handleEditClick = (comment: CommentType) => {
@@ -55,7 +79,15 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
 
   const handleDeleteComment = async (commentId: string) => {
     if (!window.confirm("Delete this comment?")) return;
-    console.log(`Deleting comment ${commentId}`);
+    
+    try {
+      await commentService.deleteComment(commentId);
+      
+      // Remove it from the UI instantly
+      setComments((prev) => prev.filter((c) => c._id !== commentId));
+    } catch (error) {
+      console.error("Failed to delete comment:", error);
+    }
   };
 
   return (
