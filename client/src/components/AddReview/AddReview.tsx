@@ -1,5 +1,4 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
-import axios from 'axios';
 import { 
   Box, 
   Button, 
@@ -7,7 +6,8 @@ import {
   Typography, 
   Rating, 
   Paper,
-  IconButton
+  IconButton,
+  MenuItem
 } from '@mui/material';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import CloseIcon from '@mui/icons-material/Close';
@@ -15,6 +15,7 @@ import * as styles from './AddReview.style';
 import postService from '../../services/postService';
 import { PostType } from '../../types/post';
 import { getImageUrl } from '../../utils/imageUtils';
+import { CATEGORIES } from '../../constants/categories';
 
 interface AddReviewProps {
   userId: string;
@@ -30,6 +31,7 @@ const AddReview: React.FC<AddReviewProps> = ({ userId, onPostSuccess, initialDat
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [restaurantName, setRestaurantName] = useState<string>(initialData?.restaurant?.name || '');
   const [restaurantCity, setRestaurantCity] = useState<string>(initialData?.restaurant?.city || '');
+  const [category, setCategory] = useState<string>(initialData?.category || 'informal');
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -51,7 +53,7 @@ const AddReview: React.FC<AddReviewProps> = ({ userId, onPostSuccess, initialDat
   // If creating a new post, an Image is required, If Editing - the user might have kept the original image
   const isEditing = !!initialData;
 
-  if (!text || !rating || (!isEditing && !image) || !restaurantName) {
+  if (!text || !rating || (!isEditing && !image) || !restaurantName || !category) {
     alert("Please fill out all fields, including restaurant details and an image!");
     return;
   }
@@ -71,49 +73,53 @@ const AddReview: React.FC<AddReviewProps> = ({ userId, onPostSuccess, initialDat
         formData.append('image', image);
         formData.append('userId', userId); 
         
+        formData.append('category', category);
+        
         // Stringify For nested objects in FormData
         formData.append('restaurant', JSON.stringify({ 
           name: restaurantName, 
           city: 'Petach Tikva' // For now - ignores the city field // TODO: CHANGE LATER CITY NAME!
         }));
 
-        const editRes = await postService.editPost(initialData._id, formData);
+        await postService.editPost(initialData._id, formData);
       } else {
         // The user only changed text fields and didnt upload a new image - so we can send a standard JSON payload
         const updateDate: Partial<PostType> = {
           text,
           rating,
+          category,
           restaurant: {name: restaurantName, city: 'Petach Tikva'} // TODO: CHANGE LATER CITY NAME!
         };
 
-        const editRes = await postService.editPost(initialData._id, updateDate);
+        await postService.editPost(initialData._id, updateDate);
       }
     } else {
-      // Create a NEW post
-      const formData = new FormData();
-      formData.append('text', text);
-      formData.append('rating', rating.toString());
-      formData.append('image', image!);
-      formData.append('userId', userId); 
-      
-      // Stringify For nested objects in FormData
-      formData.append('restaurant', JSON.stringify({ 
-        name: restaurantName, 
-        city: 'Petach Tikva' // For now - ignores the city field // TODO: CHANGE LATER CITY NAME!
-      }));
+    // Create a NEW post
+    const formData = new FormData();
+    formData.append('text', text);
+    formData.append('rating', rating.toString());
+    formData.append('image', image!);
+    formData.append('userId', userId); 
+    formData.append('category', category);
+    
+    // Stringify For nested objects in FormData
+    formData.append('restaurant', JSON.stringify({ 
+      name: restaurantName, 
+      city: restaurantCity || 'Petach Tikva'
+    }));
 
+    await postService.createPost(formData);
+  }
 
-      const newPost = await postService.createPost(formData);
-    }
-
-    if (!isEditing) {
-      // Reset all form fields
-      setText('');
-      setRating(0);
-      setRestaurantName('');
-      setRestaurantCity('');
-      removeImage();
-    }
+  if (!isEditing) {
+    // Reset all form fields
+    setText('');
+    setRating(0);
+    setRestaurantName('');
+    setRestaurantCity('');
+    setCategory('informal');
+    removeImage();
+  }
     
     if (onPostSuccess) onPostSuccess();
 
@@ -184,6 +190,24 @@ const AddReview: React.FC<AddReviewProps> = ({ userId, onPostSuccess, initialDat
           onChange={(e) => setText(e.target.value)}
           sx={{ mb: 3 }}
         />        
+
+        <TextField
+          select
+          fullWidth
+          label="Category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          sx={{ mb: 3 }}
+        >
+          {CATEGORIES.filter(c => c.id !== 'all').map((option) => (
+            <MenuItem key={option.id} value={option.id}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ mr: 1, display: 'flex' }}>{option.icon}</Box>
+                {option.label}
+              </Box>
+            </MenuItem>
+          ))}
+        </TextField>
 
         <Box sx={styles.ratingContainer}>
           <Typography variant="subtitle1" sx={{ mr: 2, fontWeight: 500 }}>

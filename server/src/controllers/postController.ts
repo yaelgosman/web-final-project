@@ -3,7 +3,7 @@ import Post from "../models/postModel";
 import { AuthRequest } from "../middlewares/authMiddleware";
 
 export const createPost = async (req: AuthRequest, res: Response) => {
-  const { rating, text } = req.body;
+  const { rating, text, category } = req.body;
   
   // parse the restaurant string back into an object
   let parsedRestaurant;
@@ -39,7 +39,7 @@ const escapeRegExp = (string: string) => {
 };
 
 export const getPosts = async (req: Request, res: Response) => {
-  const { search } = req.query;
+  const { search, category } = req.query;
 
   const mongoQuery: any = {};
   if (search && typeof search === "string") {
@@ -49,6 +49,10 @@ export const getPosts = async (req: Request, res: Response) => {
       { "restaurant.city": new RegExp(safeSearch, "i") },
       { text: new RegExp(safeSearch, "i") },
     ];
+  }
+
+  if (category && category !== 'all') {
+    mongoQuery.category = category;
   }
 
   const posts = await Post.find(mongoQuery)

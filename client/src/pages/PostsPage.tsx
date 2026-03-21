@@ -3,17 +3,12 @@ import { Container, Stack, Box, Typography, CircularProgress, Grid, Button } fro
 import EditIcon from '@mui/icons-material/Edit';
 import Post from '../components/post';
 import type { PostType } from '../types/post';
-import Navbar from '../components/Navbar';
+import CategoryFilter from '../components/CategoryFilter';
 import { CATEGORIES } from '../constants/categories';
 import postService from '../services/postService';
 import SmartSearchBar from '../components/SmartSearchBar';
 
 import { useNavigate } from 'react-router-dom';
-
-// --- Mock Data Service (Simulating an API fetch) ---
-const fetchPosts = (): Promise<PostType[]> => {
-  return postService.getAllPosts();
-}
 
 const PostPage: React.FC = () => {
   const navigate = useNavigate();
@@ -54,10 +49,11 @@ const PostPage: React.FC = () => {
   };
 
   useEffect(() => {
-    // Fetch data on component mount
+    // Fetch data whenever category changes
     const loadPosts = async () => {
+      setLoading(true);
       try {
-        const data = await fetchPosts();
+        const data = await postService.getAllPosts('', selectedCategory);
         setPosts(data);
       } catch (error) {
         console.error("Failed to fetch posts", error);
@@ -66,7 +62,7 @@ const PostPage: React.FC = () => {
       }
     };
     loadPosts();
-  }, []);
+  }, [selectedCategory]);
 
 
   if (loading) {
@@ -98,7 +94,7 @@ const PostPage: React.FC = () => {
           />
 
           <Box sx={{ mt: 3 }}>
-            <Navbar selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
+            <CategoryFilter selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
           </Box>
         </Container>
       </Box>

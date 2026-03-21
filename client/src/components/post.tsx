@@ -15,7 +15,8 @@ import {
   ListItem,
   ListItemText,
   Paper,
-  Chip
+  Chip,
+  Avatar
 } from '@mui/material';
 
 // Icons
@@ -48,7 +49,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
     setOpen(false);
   };
 
-  const handleSavePost = () => {    
+  const handleSavePost = () => {
     setIsSaved(!isSaved);
     // TODO: in the future add the rest of the logic to actually save it for the logged user
   }
@@ -71,15 +72,27 @@ const Post: React.FC<PostProps> = ({ post }) => {
         }}
       >
         <Grid container spacing={4}>
-          
+
           {/* Left Column */}
           <Grid size={{ xs: 12, md: 7 }}>
             <Box sx={{ position: 'relative', p: 1 }}>
-              
-              <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                <Typography variant="caption" sx={{ color: '#999', fontSize: '0.9rem' }}>
-                  Posted: {new Date(post.createdAt).toLocaleDateString()}
-                </Typography>
+
+              <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
+                <Avatar 
+                  src={(post.userId && typeof post.userId !== 'string' && post.userId.profileImageUrl) ? getImageUrl(post.userId.profileImageUrl) : undefined}
+                  sx={{ width: 32, height: 32, bgcolor: '#004d40' }}
+                >
+                  { (post.userId && typeof post.userId !== 'string') ? post.userId.username?.charAt(0) : '?'}
+                </Avatar>
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+                    { (post.userId && typeof post.userId !== 'string') ? post.userId.username : 'Unknown User'}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#999', fontSize: '0.75rem' }}>
+                    {new Date(post.createdAt).toLocaleDateString()}
+                  </Typography>
+                </Box>
+                <Box sx={{ flexGrow: 1 }} />
                 <Button
                   startIcon={ isSaved ? <Favorite color="error" /> : <FavoriteBorderIcon/>}
                   sx={{ 
@@ -87,12 +100,13 @@ const Post: React.FC<PostProps> = ({ post }) => {
                     textTransform: 'none', 
                     border: '1px solid #ccc', 
                     borderRadius: '20px',
-                    px: 2
+                    px: 2,
+                    height: '32px',
+                    fontSize: '0.8rem'
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleSavePost();
-                    // alert("Saved to favorites!");
                   }}
                 >
                   Save
@@ -133,12 +147,12 @@ const Post: React.FC<PostProps> = ({ post }) => {
               <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
                 Details
               </Typography>
-              
+
               <Stack direction="row" spacing={2} alignItems="center">
-                 <Chip 
+                <Chip
                   icon={<RestaurantIcon />}
-                  label="Verified Review" 
-                  sx={{ bgcolor: '#f2fcf9', fontWeight: 'bold', fontSize: '0.9rem' }} 
+                  label="Verified Review"
+                  sx={{ bgcolor: '#f2fcf9', fontWeight: 'bold', fontSize: '0.9rem' }}
                 />
               </Stack>
 
@@ -148,7 +162,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
           {/* Right Column: Image */}
           <Grid size={{ xs: 12, md: 5 }}>
             <Box sx={{ position: 'relative', height: '100%', minHeight: '300px' }}>
-               <Box
+              <Box
                 component="img"
                 src={displayImage}
                 alt={post.restaurant.name}

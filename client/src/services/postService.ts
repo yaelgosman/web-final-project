@@ -52,10 +52,15 @@ export const deletePost = async (postId: string): Promise<void> => {
 };
 
 /**
- * Fetches all posts from the database, optionally filtered by search text.
+ * Fetches all posts from the database, optionally filtered by search text and category.
  */
-export const getAllPosts = async (search?: string): Promise<PostType[]> => {
-  const url = search ? `${API_URL}?search=${encodeURIComponent(search)}` : API_URL;
+export const getAllPosts = async (search?: string, category?: string): Promise<PostType[]> => {
+  const params = new URLSearchParams();
+  if (search) params.append('search', search);
+  if (category && category !== 'all') params.append('category', category);
+  
+  const queryString = params.toString();
+  const url = queryString ? `${API_URL}?${queryString}` : API_URL;
   const response = await apiClient.get<PostType[]>(url);
   return response.data;
 };

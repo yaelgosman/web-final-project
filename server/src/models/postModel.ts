@@ -8,6 +8,7 @@ export interface IPost extends Document {
   };
   rating: number;
   text: string;
+  category: string;
   imagePath?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -25,6 +26,11 @@ const postSchema = new Schema<IPost>(
       type: String,
       required: true,
       maxlength: 500,
+    },
+    category: {
+      type: String,
+      required: true,
+      default: 'informal'
     },
     imagePath: { type: String },
   },

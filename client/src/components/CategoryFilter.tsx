@@ -3,19 +3,16 @@ import {
   Box,
   Container,
   Stack,
-  Button,
   Chip,
-  IconButton,
 } from '@mui/material';
 import { CATEGORIES } from '../constants/categories';
 
-
-interface NavbarProps {
+interface CategoryFilterProps {
   selectedCategory: string;
   onSelectCategory: (id: string) => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ selectedCategory, onSelectCategory }) => {
+const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onSelectCategory }) => {
   return (
     <Box sx={{
       position: 'sticky',
@@ -53,4 +50,4 @@ const Navbar: React.FC<NavbarProps> = ({ selectedCategory, onSelectCategory }) =
   );
 };
 
-export default Navbar;
+export default CategoryFilter;
