@@ -19,7 +19,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { INVALID_LOGIN_ERRORS } from '../constants/errors';
 import { useAuth } from '../contexts/AuthContext';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
-import { jwtDecode } from "jwt-decode";
 import { loginUser, googleSignIn } from '../services/userService';
 
 const Login: React.FC = () => {
@@ -97,26 +96,8 @@ const Login: React.FC = () => {
       // Send Google's response to your backend
       const response: any = await googleSignIn(credentialResponse);
 
-      // console.log(`response: `, response);
-
-      if (credentialResponse.credential) {
-        // Decode the Google JWT to get the user's details
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const decodedToken: any = jwtDecode(credentialResponse.credential);
-        
-        // Map Google's data to match our User structure
-        const user = {
-          _id: decodedToken.sub, // Google's unique identifier for the user
-          username: decodedToken.name,
-          email: decodedToken.email,
-          provider: "google" as const,
-          profileImage: decodedToken.picture // Get their actual Google pfp
-        };
-    
-        // const user = response.user || response;
-        const token = response.accessToken || credentialResponse.credential; // Fallback to google token if backend doesn't send one
-
-        login(user, token); // Update context
+      if (response && response.accessToken) {
+        login(response, response.accessToken);
         navigate('/');
       }
 
