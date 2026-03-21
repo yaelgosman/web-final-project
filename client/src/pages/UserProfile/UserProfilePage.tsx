@@ -9,6 +9,7 @@ import { updateUserProfile } from '../../services/profileService';
 import { fetchUserById, fetchPostsByUserId } from '../../services/profileService';
 import UserPost from "../../components/UserPosts/userPost";
 import { getImageUrl } from "../../utils/imageUtils";
+import postService from "../../services/postService";
 
 export const UserProfile: React.FC = () => {
   const location = useLocation();
@@ -124,9 +125,20 @@ export const UserProfile: React.FC = () => {
     navigate('/editReview', { state: { postToEdit: post }});
   };
 
-  const handleDeletePost = (postId: string) => {
-    console.log("Delete button clicked for post ID:", postId);
-    // TODO: implement later
+  const handleDeletePost = async (postId: string) => {
+    // Asks the user to confirm their deletion // TODO: replace with a proper Popup
+    const isConfirmed = window.confirm("Are you sure you want to delete this review? This cannot be undone.");
+    if (!isConfirmed) return;
+
+    try {
+      await postService.deletePost(postId);
+
+      // Updates the UI instantly after the deletion of the selected Review by removing it from the state
+      setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
+    } catch (err) {
+      console.error("Failed to delete post: ", err);
+      alert("There was an error deleting your review. Please try again.");
+    }
   };
 
   if (isLoading || !userData) {
