@@ -99,26 +99,31 @@ const Login: React.FC = () => {
 
       // console.log(`response: `, response);
 
-      if (credentialResponse.credential) {
-        // Decode the Google JWT to get the user's details
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const decodedToken: any = jwtDecode(credentialResponse.credential);
-        
-        // Map Google's data to match our User structure
-        const user = {
-          _id: decodedToken.sub, // Google's unique identifier for the user
-          username: decodedToken.name,
-          email: decodedToken.email,
-          provider: "google" as const,
-          profileImage: decodedToken.picture // Get their actual Google pfp
-        };
-    
-        // const user = response.user || response;
-        const token = response.accessToken || credentialResponse.credential; // Fallback to google token if backend doesn't send one
-
-        login(user, token); // Update context
+      if (response && response.accessToken) {
+        login(response, response.accessToken);
         navigate('/');
       }
+
+      // if (credentialResponse.credential) {
+      //   // Decode the Google JWT to get the user's details
+      //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      //   const decodedToken: any = jwtDecode(credentialResponse.credential);
+        
+      //   // Map Google's data to match our User structure
+      //   const user = {
+      //     _id: decodedToken.sub, // Google's unique identifier for the user
+      //     username: decodedToken.name,
+      //     email: decodedToken.email,
+      //     provider: "google" as const,
+      //     profileImage: decodedToken.picture // Get their actual Google pfp
+      //   };
+    
+      //   // const user = response.user || response;
+      //   const token = response.accessToken || credentialResponse.credential; // Fallback to google token if backend doesn't send one
+
+      //   login(user, token); // Update context
+      //   navigate('/');
+      // }
 
     } catch (error: any) {
       console.error("Google Login Error:", error);
