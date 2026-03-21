@@ -3,7 +3,7 @@ import { PostType } from "../../types/post";
 import { UserProfileProps, UserType } from "../../types/user";
 import { styles } from './UserProfile.styles';
 import { EditProfileModal } from "../../components/EditProfile/EditProfile";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { updateUserProfile } from '../../services/profileService';
 import { fetchUserById, fetchPostsByUserId } from '../../services/profileService';
@@ -12,6 +12,7 @@ import { getImageUrl } from "../../utils/imageUtils";
 
 export const UserProfile: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { id } = useParams<{ id : string }>(); // Gets the :id from the URL
   const { user: loggedInUser } = useAuth(); // Gets the logged-in user from the Auth context
   const [userData, setUserData] = useState<UserType | null>(null);
@@ -37,52 +38,6 @@ export const UserProfile: React.FC = () => {
     }
   }, [location.state, isOwnProfile]);
 
-  // useEffect(() => {
-  //   if (!profileUserId) return; // Wait until we have an ID
-
-  //   const fetchProfileData = async () => {
-  //     setIsLoading(true);
-  //     setError(null);
-      
-  //     // Mock data injection matching your types
-  //     setUserData({
-  //       _id: profileUserId,
-  //       username: 'Ofir',
-  //       email: 'user@example.com',
-  //       provider: 'local',
-  //       profileImage: 'https://thumbs.dreamstime.com/b/default-avatar-profile-vector-user-profile-default-avatar-profile-vector-user-profile-profile-179376714.jpg', 
-  //       createdAt: new Date().toISOString()
-  //     });
-
-  //     setPosts([
-  //       { 
-  //         _id: '1', 
-  //         userId: profileUserId, 
-  //         restaurant: { name: 'Trattoria Bella', city: 'Rome' }, 
-  //         rating: 5, 
-  //         text: 'Best carbonara ever!',
-  //         imagePath: 'https://static.toiimg.com/thumb/53784736.cms?imgsize=51659&width=800&height=800',
-  //         createdAt: new Date().toISOString(),
-  //         updatedAt: new Date().toISOString()
-  //       },
-  //       { 
-  //         _id: '2', 
-  //         userId: profileUserId, 
-  //         restaurant: { name: 'The Grind Cafe', city: 'Tel Aviv' }, 
-  //         rating: 4, 
-  //         imagePath: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRukVq3uaqVuS9RRUzaByz6y1CjWDF485z92Q&s',
-  //         text: 'Great espresso, but limited seating.',
-  //         createdAt: new Date().toISOString(),
-  //         updatedAt: new Date().toISOString()
-  //       },
-  //     ]);
-      
-  //     setIsLoading(false);
-  //   };
-
-  //   fetchProfileData();
-  // }, [profileUserId]);
-
   useEffect(() => {
   if (!profileUserId) return; 
 
@@ -98,8 +53,6 @@ export const UserProfile: React.FC = () => {
         fetchUserById(profileUserId),
         fetchPostsByUserId(profileUserId)
       ]);
-
-      console.log(`user data result: `, userDataResult);
 
       // Only update state if the component is still mounted
       if (isMounted) {
@@ -167,9 +120,8 @@ export const UserProfile: React.FC = () => {
     return URL.createObjectURL(image);
   };
 
-  const handleEditPost = (postId: string) => {
-    console.log("Edit button clicked for post ID:", postId);
-    // TODO: implement later
+  const handleEditPost = (post: PostType) => {
+    navigate('/editReview', { state: { postToEdit: post }});
   };
 
   const handleDeletePost = (postId: string) => {
@@ -225,7 +177,7 @@ export const UserProfile: React.FC = () => {
           ) : (
             posts.map((post) => (
               <div key={post._id} style={styles.gridItem}>
-                <UserPost post={post} getImageUrl={getImageUrl} onEdit={handleEditPost} onDelete={handleDeletePost} />
+                <UserPost post={post} getImageUrl={getImageUrl} onEdit={() => handleEditPost(post)} onDelete={handleDeletePost} />
               </div>
             )
           ))}

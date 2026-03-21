@@ -34,7 +34,7 @@ export const getPost = async (postId: string): Promise<PostType> => {
 export const editPost = async (postId: string, updateData: FormData | Partial<PostType>): Promise<PostType> => {
   const isFormData = updateData instanceof FormData;
 
-  const response = await apiClient.patch<PostType>(`${API_URL}/${postId}`, updateData, {
+  const response = await apiClient.put<PostType>(`${API_URL}/${postId}`, updateData, {
     headers: {
       // Dynamically apply the correct header based on payload type
       'Content-Type': isFormData ? 'multipart/form-data' : 'application/json',

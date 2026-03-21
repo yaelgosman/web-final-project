@@ -6,6 +6,7 @@ import Login from '../pages/Login';
 import Register from '../pages/Register';
 import { UserProfile } from '../pages/UserProfile/UserProfilePage';
 import AddReviewPage from '../pages/AddReviewPage';
+import EditReviewPage from '../pages/EditReviewPage';
 
 // --- Protected Layout Component ---
 const ProtectedLayout = () => {
@@ -38,6 +39,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/profile/:id" element={<UserProfile/>} />
         {/* by adding the :id part we make the path dynamic. and the regular /Profile is for the logged-in user */}
         <Route path="/AddReview" element={<AddReviewPage/>} />
+        <Route path="/editReview" element={<EditReviewPage />} />
         {/* Add more protected routes here later */}
       </Route>
 

@@ -13,20 +13,23 @@ import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import CloseIcon from '@mui/icons-material/Close';
 import * as styles from './AddReview.style';
 import postService from '../../services/postService';
+import { PostType } from '../../types/post';
+import { getImageUrl } from '../../utils/imageUtils';
 
 interface AddReviewProps {
   userId: string;
   onPostSuccess?: () => void;
+  initialData?: PostType;
 }
 
-const AddReview: React.FC<AddReviewProps> = ({ userId, onPostSuccess }) => {
-  const [text, setText] = useState<string>('');
-  const [rating, setRating] = useState<number | null>(0);
+const AddReview: React.FC<AddReviewProps> = ({ userId, onPostSuccess, initialData }) => {
+  const [text, setText] = useState<string>(initialData?.text || '');
+  const [rating, setRating] = useState<number | null>(initialData?.rating || 0);
   const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(initialData?.imagePath ? getImageUrl(initialData?.imagePath) : null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [restaurantName, setRestaurantName] = useState<string>('');
-  const [restaurantCity, setRestaurantCity] = useState<string>('');
+  const [restaurantName, setRestaurantName] = useState<string>(initialData?.restaurant?.name || '');
+  const [restaurantCity, setRestaurantCity] = useState<string>(initialData?.restaurant?.city || '');
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -45,38 +48,75 @@ const AddReview: React.FC<AddReviewProps> = ({ userId, onPostSuccess }) => {
   const handleSubmit = async (e: FormEvent) => {
   e.preventDefault();
   
-  if (!text || !rating || !image || !restaurantName) {
+  // If creating a new post, an Image is required, If Editing - the user might have kept the original image
+  const isEditing = !!initialData;
+
+  if (!text || !rating || (!isEditing && !image) || !restaurantName) {
     alert("Please fill out all fields, including restaurant details and an image!");
     return;
   }
 
   setIsSubmitting(true);
 
-  const formData = new FormData();
-  formData.append('text', text);
-  formData.append('rating', rating.toString());
-  formData.append('image', image);
-  formData.append('userId', userId); 
-  
-  // Stringify For nested objects in FormData
-  formData.append('restaurant', JSON.stringify({ 
-    name: restaurantName, 
-    city: 'Petach Tikva' // For now - ignores the city field
-  }));
-
   try {
-    const newPost = await postService.createPost(formData);
 
-    if (newPost) {
+    // Edit mode
+    if (isEditing && initialData) {
+      if (image) {
+        // The user uploaded a NEW image, so we must use FormData.
+
+        const formData = new FormData();
+        formData.append('text', text);
+        formData.append('rating', rating.toString());
+        formData.append('image', image);
+        formData.append('userId', userId); 
+        
+        // Stringify For nested objects in FormData
+        formData.append('restaurant', JSON.stringify({ 
+          name: restaurantName, 
+          city: 'Petach Tikva' // For now - ignores the city field // TODO: CHANGE LATER CITY NAME!
+        }));
+
+        const editRes = await postService.editPost(initialData._id, formData);
+      } else {
+        // The user only changed text fields and didnt upload a new image - so we can send a standard JSON payload
+        const updateDate: Partial<PostType> = {
+          text,
+          rating,
+          restaurant: {name: restaurantName, city: 'Petach Tikva'} // TODO: CHANGE LATER CITY NAME!
+        };
+
+        const editRes = await postService.editPost(initialData._id, updateDate);
+      }
+    } else {
+      // Create a NEW post
+      const formData = new FormData();
+      formData.append('text', text);
+      formData.append('rating', rating.toString());
+      formData.append('image', image!);
+      formData.append('userId', userId); 
+      
+      // Stringify For nested objects in FormData
+      formData.append('restaurant', JSON.stringify({ 
+        name: restaurantName, 
+        city: 'Petach Tikva' // For now - ignores the city field // TODO: CHANGE LATER CITY NAME!
+      }));
+
+
+      const newPost = await postService.createPost(formData);
+    }
+
+    if (!isEditing) {
       // Reset all form fields
       setText('');
       setRating(0);
       setRestaurantName('');
       setRestaurantCity('');
       removeImage();
-      
-      if (onPostSuccess) onPostSuccess();
     }
+    
+    if (onPostSuccess) onPostSuccess();
+
   } catch (error) {
     console.error("Error submitting review:", error);
   } finally {

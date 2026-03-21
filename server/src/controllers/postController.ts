@@ -42,15 +42,35 @@ export const getPosts = async (req: Request, res: Response) => {
 };
 
 export const updatePost = async (req: AuthRequest, res: Response) => {
-  const { id } = req.params;
-  const post = await Post.findById(id);
-  if (!post) return res.status(404).json({ error: "Post not found" });
-  if (post.userId.toString() !== req.userId)
-    return res.status(403).json({ error: "Forbidden" });
+  try {    
+    const { id } = req.params;
+    const post = await Post.findById(id);
+    if (!post) return res.status(404).json({ error: "Post not found" });
+    if (post.userId.toString() !== req.userId)
+      return res.status(403).json({ error: "Forbidden" });
 
-  Object.assign(post, req.body);
-  await post.save();
-  res.json(post);
+    // Update text and rating if they exist
+    if (req.body?.text) post.text = req.body.text;
+    if (req.body?.rating) post.rating = Number(req.body.rating);
+
+    // Parse and update the restaurant object safely
+    if (req.body?.restaurant) {
+      post.restaurant = typeof req.body.restaurant === 'string'
+        ? JSON.parse(req.body.restaurant)
+        : req.body.restaurant;
+    }
+
+    // Update the image path ONLY if a new file was uploaded
+    if (req.file) {
+      post.imagePath = req.file.path;
+    }
+
+    await post.save();
+    res.json(post);
+  } catch (error) {
+    console.error("Error updating post:", error);
+    res.status(500).json({ error: "Failed to update post" });
+  }
 };
 
 export const deletePost = async (req: AuthRequest, res: Response) => {
