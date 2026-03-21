@@ -7,7 +7,7 @@ import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { updateUserProfile } from '../../services/profileService';
 import { fetchUserById, fetchPostsByUserId } from '../../services/profileService';
-import UserPost from "../../components/UserPosts/userPost";
+import UserPost from "../../components/UserPosts/UserPost.tsx";
 import { getImageUrl } from "../../utils/imageUtils";
 import postService from "../../services/postService";
 
