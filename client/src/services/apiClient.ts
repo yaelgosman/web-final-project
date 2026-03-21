@@ -1,9 +1,8 @@
 import axios from 'axios';
-import { BASE_URL } from '../constants/server';
 
 const apiClient = axios.create({
     // TODO: Replace with the actual backend URL
-    baseURL: BASE_URL,
+    baseURL: 'http://localhost:3000', 
     headers: {
         'Content-Type': 'application/json',
     },
@@ -16,7 +15,7 @@ apiClient.interceptors.request.use(
     (config) => {
         // Retrieve the token from local storage
         const token = localStorage.getItem('token');
-
+        
         // If a token exists, add it to the Authorization header
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;

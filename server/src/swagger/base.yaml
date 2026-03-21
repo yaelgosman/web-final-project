@@ -22,7 +22,7 @@ components:
           type: string
         email:
           type: string
-        profileImagePath:
+        profileImageUrl:
           type: string
         accessToken:
           type: string
@@ -40,7 +40,7 @@ components:
         provider:
           type: string
           enum: [local, google, facebook]
-        profileImagePath:
+        profileImageUrl:
           type: string
         createdAt:
           type: string

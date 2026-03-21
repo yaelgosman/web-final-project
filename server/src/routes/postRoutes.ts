@@ -4,8 +4,7 @@ import {
   getPosts,
   updatePost,
   deletePost,
-  getUserPosts,
-  getPost
+  getPostsByUserId
 } from "../controllers/postController";
 import { authenticate } from "../middlewares/authMiddleware";
 import { upload } from "../middlewares/uploadMiddleware";
@@ -13,8 +12,8 @@ import { upload } from "../middlewares/uploadMiddleware";
 const router = Router();
 
 router.get("/", getPosts);
-router.get("/:id", getPost);
-router.get("/user/:userId", getUserPosts);
+
+router.get("/user/:userId", getPostsByUserId);
 router.post("/", authenticate, upload.single("image"), createPost);
 router.put("/:id", authenticate, upload.single('image'), updatePost);
 router.delete("/:id", authenticate, deletePost);

@@ -4,7 +4,7 @@ export interface UserType {
   email: string;
   password?: string; // Only needed for registration form payload
   provider: "local" | "google" | "facebook";
-  profileImagePath?: string | File; // Can be a URL string or a File object during upload
+  profileImageUrl?: string | File; // Can be a URL string or a File object during upload
   createdAt?: string;
 }
 

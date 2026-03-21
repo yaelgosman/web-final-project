@@ -4,7 +4,6 @@ import { UserType } from '../types/user';
 interface AuthContextType {
     user: UserType | null;
     login: (userData: UserType, token: string) => void;
-    updateUser: (userData: UserType) => void;
     logout: () => void;
     isAuthenticated: boolean;
 }
@@ -33,11 +32,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) => {
         localStorage.setItem('token', token);        
     };
 
-    const updateUser = (userData: UserType) => {
-        setUser(userData);
-        localStorage.setItem('user', JSON.stringify(userData));
-    };
-
     const logout = () => {
         setUser(null); // First sets the user state for the UI to react immidiately on logout
         localStorage.removeItem('user');
@@ -45,7 +39,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, updateUser, logout, isAuthenticated: !!user }}>
+        <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
             {children}
         </AuthContext.Provider>
     );
