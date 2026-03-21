@@ -28,7 +28,7 @@ paths:
               properties:
                 username:
                   type: string
-                profileImagePath:
+                profileImageUrl:
                   type: string
       responses:
         '200':

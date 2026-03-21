@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import {
-    AppBar,
-    Toolbar,
-    Box,
-    Typography,
-    Button,
-    InputBase,
-    Container,
-    Stack,
-    IconButton,
-    Avatar,
-    Menu,
-    MenuItem,
-    Divider,
-    ListItemIcon
+  AppBar,
+  Toolbar,
+  Box,
+  Typography,
+  Button,
+  InputBase,
+  Container,
+  Stack,
+  IconButton,
+  Avatar,
+  Menu,
+  MenuItem,
+  Divider,
+  ListItemIcon
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import EditIcon from '@mui/icons-material/Edit'; // For "Review"
@@ -26,7 +26,6 @@ import Logout from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { VALID_PATHS } from '../constants/paths';
-import { BASE_URL } from '../constants/server';
 
 const MainHeader: React.FC = () => {
     const navigate = useNavigate(); // Hook for navigation
@@ -39,7 +38,7 @@ const MainHeader: React.FC = () => {
     const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
     };
-
+    
     const handleMenuClose = () => {
         setAnchorEl(null);
     };
@@ -55,7 +54,7 @@ const MainHeader: React.FC = () => {
     }
 
     // Handles dynamic navigation for the user's choice, (Options is to pass a specific state to the router: for example the logged user's id to the profile page)
-    const handleNavigationToPages = (navigateTo: string, options?: { state?: any }) => {
+    const handleNavigationToPages = (navigateTo: string, options?: { state?: any}) => {
         // if the given path doesnt exist (or isnt valid) - do nothing. (checks if exact match or if its a dynamic profile route by :id)
         const isValid = VALID_PATHS.includes(navigateTo) || navigateTo.startsWith('/profile')
 
@@ -72,12 +71,12 @@ const MainHeader: React.FC = () => {
     const getAvatarUrl = (path: any) => {
         if (!path || typeof path !== 'string') return undefined;
         if (path.startsWith('http')) return path; // Allows Google Auth or external links to work
-
+        
         // Clean out "public/" and format the string
         let cleanPath = path.replace(/^\\?public[\\/]?/, '/').replace(/^\/public\//, '/');
         if (!cleanPath.startsWith('/')) cleanPath = `/${cleanPath}`;
-
-        return `${BASE_URL}${cleanPath}`;
+                
+        return `http://localhost:3000${cleanPath}`;
     };
 
     return (
@@ -145,112 +144,84 @@ const MainHeader: React.FC = () => {
                         >
                             Sign in
                         </Button>
-
-                        <Button color="inherit" sx={{ textTransform: 'none', fontWeight: 600, display: { xs: 'none', md: 'flex' } }}>
-                            Review
-                        </Button>
-
-                        <Stack direction="row" spacing={0.5}>
-                            <IconButton><NotificationsNoneIcon /></IconButton>
-                        </Stack>
-
-                        {
-                            !isAuthenticated ? (
-                                // if not logged in - show the 'sign in' button
-                                <Button
-                                    variant="contained"
-                                    sx={{
-                                        bgcolor: '#000',
-                                        color: '#fff',
-                                        borderRadius: '20px',
-                                        textTransform: 'none',
-                                        fontWeight: 'bold',
-                                        px: 3,
-                                        '&:hover': { bgcolor: '#333' }
-                                    }}
-                                    onClick={handleSignIn}
+                    ) : (
+                        // if logged in - show the user avatar & menu
+                        <>
+                            <IconButton
+                                onClick={handleMenuOpen}
+                                size='small'
+                                sx={{ ml: 2 }}
+                                aria-controls={ open ? 'account-menu' : undefined }
+                                aria-haspopup="true"
+                                aria-expanded={open ? 'true' : undefined}
+                            >
+                                <Avatar
+                                    src={getAvatarUrl(user?.profileImageUrl)}
+                                    alt={user?.username || 'User'}
+                                    sx={{ width: 40, height: 40, bgcolor: '#004d40'}}
                                 >
-                                    Sign in
-                                </Button>
-                            ) : (
-                                // if logged in - show the user avatar & menu
-                                <>
-                                    <IconButton
-                                        onClick={handleMenuOpen}
-                                        size='small'
-                                        sx={{ ml: 2 }}
-                                        aria-controls={open ? 'account-menu' : undefined}
-                                        aria-haspopup="true"
-                                        aria-expanded={open ? 'true' : undefined}
-                                    >
-                                        <Avatar
-                                            src={getAvatarUrl(user?.profileImagePath)}
-                                            alt={user?.username || 'User'}
-                                            sx={{ width: 40, height: 40, bgcolor: '#004d40' }}
-                                        >
-                                            {user?.username?.charAt(0)?.toUpperCase() || 'U'}
-                                        </Avatar>
-                                    </IconButton>
+                                    {user?.username?.charAt(0)?.toUpperCase() || 'U'}
+                                </Avatar>
+                            </IconButton>
 
-                                    <Menu
-                                        anchorEl={anchorEl}
-                                        id="account-menu"
-                                        open={open}
-                                        onClose={handleMenuClose}
-                                        onClick={handleMenuClose}
-                                        PaperProps={{
-                                            elevation: 0,
-                                            sx: {
-                                                overflow: 'visible',
-                                                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-                                                mt: 1.5,
-                                                '& .MuiAvatar-root': { width: 32, height: 32, ml: -0.5, mr: 1 },
-                                                '&:before': {
-                                                    content: '""',
-                                                    display: 'block',
-                                                    position: 'absolute',
-                                                    top: 0, right: 14, width: 10, height: 10,
-                                                    bgcolor: 'background.paper',
-                                                    transform: 'translateY(-50%) rotate(45deg)',
-                                                    zIndex: 0,
-                                                },
-                                            },
-                                        }}
-                                        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                                        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-                                    >
+                            <Menu
+                                anchorEl={anchorEl}
+                                id="account-menu"
+                                open={open}
+                                onClose={handleMenuClose}
+                                onClick={handleMenuClose}
+                                PaperProps={{elevation: 0,
+                                        sx: {
+                                        overflow: 'visible',
+                                        filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                                        mt: 1.5,
+                                        '& .MuiAvatar-root': { width: 32, height: 32, ml: -0.5, mr: 1 },
+                                        '&:before': {
+                                            content: '""',
+                                            display: 'block',
+                                            position: 'absolute',
+                                            top: 0, right: 14, width: 10, height: 10,
+                                            bgcolor: 'background.paper',
+                                            transform: 'translateY(-50%) rotate(45deg)',
+                                            zIndex: 0,
+                                        },
+                                    },
+                                }}
+                                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                            >
 
-                                        <MenuItem onClick={() => handleNavigationToPages("/profile")}>
-                                            <Avatar src={getAvatarUrl(user?.profileImagePath)} /> <b>{user?.username}</b>
-                                        </MenuItem>
-                                        <Divider />
+                                <MenuItem onClick={() => handleNavigationToPages("/profile")}>
+                                    <Avatar src={getAvatarUrl(user?.profileImageUrl)} /> <b>{user?.username}</b>
+                                </MenuItem>
+                                <Divider/>
 
-                                        <MenuItem onClick={() => handleNavigationToPages(`/profile/${user?._id}`, { state: { editMode: true } })}>
-                                            <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
-                                            Profile Settings
-                                        </MenuItem>
+                                <MenuItem onClick={() => handleNavigationToPages(`/profile/${user?._id}`, { state: { editMode: true } })}>
+                                    <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
+                                    Profile Settings
+                                </MenuItem>
+                                
+                                <MenuItem onClick={() => handleNavigationToPages("/profile")}>
+                                    <ListItemIcon><ReceiptLongIcon fontSize="small" /></ListItemIcon>
+                                    My Posts
+                                </MenuItem>
 
-                                        <MenuItem onClick={() => handleNavigationToPages("/profile")}>
-                                            <ListItemIcon><ReceiptLongIcon fontSize="small" /></ListItemIcon>
-                                            My Posts
-                                        </MenuItem>
+                                <Divider />
+                                
+                                <MenuItem onClick={handleLogout}>
+                                    <ListItemIcon><Logout fontSize="small" /></ListItemIcon>
+                                    Logout
+                                </MenuItem>
 
-                                        <Divider />
+                            </Menu>
 
-                                        <MenuItem onClick={handleLogout}>
-                                            <ListItemIcon><Logout fontSize="small" /></ListItemIcon>
-                                            Logout
-                                        </MenuItem>
+                        </>
+                    )
+                }
+            </Stack>
 
-                                    </Menu>
-
-                                </>
-                            )
-                        }
-                    </Stack>
-
-                </Toolbar>
-            </Container>
+            </Toolbar>
+        </Container>
         </AppBar>
     );
 };
