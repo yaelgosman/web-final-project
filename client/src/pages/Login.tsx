@@ -67,10 +67,9 @@ const Login: React.FC = () => {
       setIsLoading(true);
       const response: any = await googleSignIn(credentialResponse);
 
-      const { user, accessToken, refreshToken } = response;
+      const { accessToken, refreshToken, ...user } = response;
 
-      login(user, accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
+      login(user, accessToken, refreshToken);
 
       navigate('/');
     } catch (error: any) {

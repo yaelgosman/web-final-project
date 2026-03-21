@@ -50,26 +50,6 @@ const MainHeader: React.FC = () => {
                         LetItCook
                     </Typography>
 
-                    <Box sx={{
-                        flex: 1,
-                        maxWidth: '400px',
-                        mx: 4,
-                        display: { xs: 'none', sm: 'flex' },
-                        alignItems: 'center',
-                        bgcolor: '#f5f5f5',
-                        borderRadius: '24px',
-                        px: 2,
-                        py: 0.5,
-                        border: '1px solid transparent',
-                        '&:hover': { bgcolor: '#eee', borderColor: '#ddd' }
-                    }}>
-                        <SearchIcon sx={{ color: '#888', mr: 1 }} />
-                        <InputBase
-                            placeholder="Find your next meal (AI)..."
-                            sx={{ fontSize: '0.9rem', width: '100%' }}
-                        />
-                    </Box>
-
                     <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ p: 0.5, border: '1px solid #eee' }}>
                         <Avatar
                             src={typeof user?.profileImageUrl === 'string' ? getImageUrl(user.profileImageUrl) : (user?.profileImageUrl ? URL.createObjectURL(user.profileImageUrl as File) : undefined)}

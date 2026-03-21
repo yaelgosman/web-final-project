@@ -34,8 +34,24 @@ export const createPost = async (req: AuthRequest, res: Response) => {
   }
 };
 
+const escapeRegExp = (string: string) => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 export const getPosts = async (req: Request, res: Response) => {
-  const posts = await Post.find()
+  const { search } = req.query;
+
+  const mongoQuery: any = {};
+  if (search && typeof search === "string") {
+    const safeSearch = escapeRegExp(search);
+    mongoQuery.$or = [
+      { "restaurant.name": new RegExp(safeSearch, "i") },
+      { "restaurant.city": new RegExp(safeSearch, "i") },
+      { text: new RegExp(safeSearch, "i") },
+    ];
+  }
+
+  const posts = await Post.find(mongoQuery)
     .populate("userId", "username profileImageUrl")
     .sort({ createdAt: -1 });
   res.json(posts);

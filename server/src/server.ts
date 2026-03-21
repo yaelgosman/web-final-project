@@ -12,6 +12,7 @@ import postRoutes from "./routes/postRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import likeRoutes from "./routes/likeRoutes";
 import uploadRoutes from "./routes/uploadRoutes";
+import aiRoutes from "./routes/aiRoutes";
 import swaggerSpec from "./swaggerConfig";
 
 
@@ -30,6 +31,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/likes", likeRoutes);
+app.use("/api/ai", aiRoutes);
 app.use("/uploads", express.static("public/uploads"));
 app.use("/upload", uploadRoutes);
 

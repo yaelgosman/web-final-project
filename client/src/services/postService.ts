@@ -52,10 +52,19 @@ export const deletePost = async (postId: string): Promise<void> => {
 };
 
 /**
- * Fetches all posts from the database.
+ * Fetches all posts from the database, optionally filtered by search text.
  */
-export const getAllPosts = async (): Promise<PostType[]> => {
-  const response = await apiClient.get<PostType[]>(API_URL);
+export const getAllPosts = async (search?: string): Promise<PostType[]> => {
+  const url = search ? `${API_URL}?search=${encodeURIComponent(search)}` : API_URL;
+  const response = await apiClient.get<PostType[]>(url);
+  return response.data;
+};
+
+/**
+ * Searches posts using the AI smart search functionality.
+ */
+export const aiSearch = async (query: string): Promise<PostType[]> => {
+  const response = await apiClient.post<PostType[]>('/api/ai/search', { query });
   return response.data;
 };
 
@@ -64,7 +73,8 @@ const postService = {
   getPost,
   editPost,
   deletePost,
-  getAllPosts
+  getAllPosts,
+  aiSearch
 };
 
 export default postService;
