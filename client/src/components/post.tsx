@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -17,6 +17,7 @@ import {
   Paper,
   Chip
 } from '@mui/material';
+import likeService from '../services/likeService';
 
 // Icons
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -28,6 +29,7 @@ import RestaurantIcon from '@mui/icons-material/Restaurant';
 import type { PostType } from '../types/post';
 import { getImageUrl } from '../utils/imageUtils';
 import CommentsSection from './PostComment/CommentSection';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 
 interface PostProps {
   post: PostType;
@@ -35,9 +37,35 @@ interface PostProps {
 
 const Post: React.FC<PostProps> = ({ post }) => {
   const [open, setOpen] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
 
-  // TODO: Add comments count (either from the parent component or fetch here the comments this post)
+  // Fetch the likes count and status when the component mounts
+  useEffect(() => {
+    const fetchLikes = async () => {
+      try {
+        const data = await likeService.getPostLikes(post._id);
+        setLikesCount(data.count);
+        setIsSaved(data.hasLiked);
+      } catch (error) {
+        console.error("Failed to fetch likes:", error);
+      }
+    };
+    fetchLikes();
+  }, [post._id]);
+
+  const handleSavePost = async () => {    
+    setIsSaved(!isSaved);
+    setLikesCount(prev => isSaved ? prev - 1 : prev + 1);
+
+    try {
+      await likeService.toggleLike(post._id, isSaved);
+    } catch (error) {
+      console.error("Failed to toggle like:", error);
+      setIsSaved(isSaved);
+      setLikesCount(prev => isSaved ? prev + 1 : prev - 1);
+    }
+  }
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -47,11 +75,6 @@ const Post: React.FC<PostProps> = ({ post }) => {
     e.stopPropagation();
     setOpen(false);
   };
-
-  const handleSavePost = () => {    
-    setIsSaved(!isSaved);
-    // TODO: in the future add the rest of the logic to actually save it for the logged user
-  }
 
   const displayImage = getImageUrl(post.imagePath) || "https://upload.wikimedia.org/wikipedia/commons/a/a3/Image-not-found.png?_=20210521171500";
 
@@ -80,7 +103,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
                 <Typography variant="caption" sx={{ color: '#999', fontSize: '0.9rem' }}>
                   Posted: {new Date(post.createdAt).toLocaleDateString()}
                 </Typography>
-                <Button
+                {/* <Button
                   startIcon={ isSaved ? <Favorite color="error" /> : <FavoriteBorderIcon/>}
                   sx={{ 
                     color: '#000', 
@@ -96,7 +119,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
                   }}
                 >
                   Save
-                </Button>
+                </Button> */}
               </Stack>
 
               <Typography variant="h3" component="h1" sx={{ fontWeight: 'bold', mt: 1, fontFamily: 'serif' }}>
@@ -125,21 +148,44 @@ const Post: React.FC<PostProps> = ({ post }) => {
 
               <Typography variant="body1" sx={{ mt: 3, mb: 3, color: '#444', lineHeight: 1.6 }}>
                 "{post.text}"
-                {/* <Box component="span" sx={{ fontWeight: 'bold', cursor: 'pointer', ml: 1, textDecoration: 'underline' }}>
-                  Read more
-                </Box> */}
-              </Typography>
-
-              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-                Details
               </Typography>
               
               <Stack direction="row" spacing={2} alignItems="center">
-                 <Chip 
-                  icon={<RestaurantIcon />}
-                  label="Verified Review" 
-                  sx={{ bgcolor: '#f2fcf9', fontWeight: 'bold', fontSize: '0.9rem' }} 
-                />
+                <Button 
+                  startIcon={<ChatBubbleOutlineIcon sx={{ color: '#000000' }} />}
+                  sx={{
+                    mb: 3,
+                    textTransform: 'none',
+                    bgcolor: 'transparent',
+                    border: '1px solid #e0e0e0', 
+                    borderRadius: '24px', 
+                    color: '#000000',
+                    px: 3,
+                    py: 0.75, // Adjust padding
+                    '&:hover': { bgcolor: '#f0f0f0', color: '#000000' }
+                  }}
+                  onClick={handleClickOpen} 
+                >
+                  {post.commentsCount || 0} Comments
+                </Button>
+
+                <Button
+                  startIcon={ isSaved ? <Favorite color="error" /> : <FavoriteBorderIcon/>}
+                  sx={{ 
+                    color: '#000', 
+                    textTransform: 'none', 
+                    border: '1px solid #ccc', 
+                    borderRadius: '20px',
+                    px: 2
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSavePost();
+                  }}
+                >
+                  {likesCount}
+                </Button>
+
               </Stack>
 
             </Box>

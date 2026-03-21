@@ -18,8 +18,16 @@ export const unlikePost = async (req: AuthRequest, res: Response) => {
   res.json({ message: "Unliked" });
 };
 
-export const getLikesByPost = async (req: Request, res: Response) => {
+export const getLikesByPost = async (req: AuthRequest, res: Response) => {
   const { postId } = req.params;
   const likes = await Like.find({ postId });
-  res.json({ count: likes.length });
+  
+  // Check if the currently logged-in user's ID is in this list
+  const hasLiked = likes.some(like => like.userId.toString() === req.userId);
+  
+  // Return BOTH the count and the boolean to the frontend
+  res.json({ 
+    count: likes.length, 
+    hasLiked 
+  });
 };
