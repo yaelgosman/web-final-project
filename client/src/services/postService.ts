@@ -51,11 +51,20 @@ export const deletePost = async (postId: string): Promise<void> => {
   await apiClient.delete(`${API_URL}/${postId}`);
 };
 
+/**
+ * Fetches all posts from the database.
+ */
+export const getAllPosts = async (): Promise<PostType[]> => {
+  const response = await apiClient.get<PostType[]>(API_URL);
+  return response.data;
+};
+
 const postService = {
   createPost,
   getPost,
   editPost,
-  deletePost
+  deletePost,
+  getAllPosts
 };
 
 export default postService;

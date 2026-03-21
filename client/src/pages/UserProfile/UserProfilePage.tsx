@@ -8,6 +8,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { updateUserProfile } from '../../services/profileService';
 import { fetchUserById, fetchPostsByUserId } from '../../services/profileService';
 import UserPost from "../../components/UserPosts/userPost";
+import { getImageUrl } from "../../utils/imageUtils";
 
 export const UserProfile: React.FC = () => {
   const location = useLocation();
@@ -159,22 +160,9 @@ export const UserProfile: React.FC = () => {
     }
   };
 
-  const getImageUrl = (imagePath?: string) => {
-    if (!imagePath) return 'https://via.placeholder.com/150'; // Default avatar
-    if (imagePath.startsWith('http')) return imagePath; // Google Auth or external URLs
-    
-    // Clean up the path just in case "public" is stuck in your DB from earlier
-    let cleanPath = imagePath.replace(/^\\?public[\\/]/, '/').replace(/^\/public\//, '/');
-    
-    // Ensure it starts with a slash
-    if (!cleanPath.startsWith('/')) cleanPath = `/${cleanPath}`;
-
-    return `http://localhost:3000${cleanPath}`; 
-  };
-
   // Helper to safely render the profile image whether it's a URL string or a File object
   const getProfileImageUrl = (image?: string | File) => {
-    if (!image) return 'https://via.placeholder.com/150'; // Default fallback
+    if (!image) return 'https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-portrait-176256935.jpg'; // Default fallback
     if (typeof image === 'string') return getImageUrl(image);
     return URL.createObjectURL(image);
   };

@@ -26,6 +26,7 @@ import CircleIcon from '@mui/icons-material/Circle';
 import CloseIcon from '@mui/icons-material/Close';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import type { PostType } from '../types/post';
+import { getImageUrl } from '../utils/imageUtils';
 
 interface PostProps {
   post: PostType;
@@ -49,7 +50,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
     // TODO: in the future add the rest of the logic to actually save it for the logged user
   }
 
-  const displayImage = post.imagePath || "https://via.placeholder.com/600x400?text=No+Image";
+  const displayImage = getImageUrl(post.imagePath) || "https://upload.wikimedia.org/wikipedia/commons/a/a3/Image-not-found.png?_=20210521171500";
 
   return (
     <>
