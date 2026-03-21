@@ -27,6 +27,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import type { PostType } from '../types/post';
 import { getImageUrl } from '../utils/imageUtils';
+import CommentsSection from './PostComment/CommentSection';
 
 interface PostProps {
   post: PostType;
@@ -35,6 +36,8 @@ interface PostProps {
 const Post: React.FC<PostProps> = ({ post }) => {
   const [open, setOpen] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+
+  // TODO: Add comments count (either from the parent component or fetch here the comments this post)
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -176,7 +179,10 @@ const Post: React.FC<PostProps> = ({ post }) => {
           </IconButton>
         </DialogTitle>
         <Divider />
-        <DialogContent>
+
+        <CommentsSection postId={post._id} />
+
+        {/* <DialogContent>
           <List>
             <ListItem alignItems="flex-start">
                <ListItemText 
@@ -184,7 +190,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
                />
             </ListItem>
           </List>
-        </DialogContent>
+        </DialogContent> */}
       </Dialog>
     </>
   );
