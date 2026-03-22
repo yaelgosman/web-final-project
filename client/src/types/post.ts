@@ -15,4 +15,5 @@ export interface PostType {
   imagePath?: string; 
   createdAt: string;
   updatedAt: string;
+  commentsCount?: number;
 }

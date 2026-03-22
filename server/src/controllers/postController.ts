@@ -4,19 +4,19 @@ import { AuthRequest } from "../middlewares/authMiddleware";
 
 export const createPost = async (req: AuthRequest, res: Response) => {
   const { rating, text, category } = req.body;
-  
+
   // parse the restaurant string back into an object
   let parsedRestaurant;
   try {
     // Check if it's a string (FormData) and parse it. 
     // The fallback allows standard JSON requests to still work during API testing.
-    parsedRestaurant = typeof req.body.restaurant === 'string' 
-      ? JSON.parse(req.body.restaurant) 
+    parsedRestaurant = typeof req.body.restaurant === 'string'
+      ? JSON.parse(req.body.restaurant)
       : req.body.restaurant;
   } catch (error) {
     return res.status(400).json({ error: "Invalid restaurant data format" });
   }
-    
+
   const imagePath = req.file ? req.file.path : req.body.imagePath;
 
   try {
@@ -62,7 +62,7 @@ export const getPosts = async (req: Request, res: Response) => {
 };
 
 export const updatePost = async (req: AuthRequest, res: Response) => {
-  try {    
+  try {
     const { id } = req.params;
     const post = await Post.findById(id);
     if (!post) return res.status(404).json({ error: "Post not found" });
@@ -107,10 +107,10 @@ export const deletePost = async (req: AuthRequest, res: Response) => {
 export const getPostsByUserId = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-    
+
     // Find all posts where the author's ID matches the one in the URL
     const userPosts = await Post.find({ userId: userId });
-    
+
     res.status(200).json(userPosts);
   } catch (error) {
     console.error("Error fetching user's posts:", error);

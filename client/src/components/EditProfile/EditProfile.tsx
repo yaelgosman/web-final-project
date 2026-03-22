@@ -14,7 +14,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ currentUser,
   const [username, setUsername] = useState(currentUser.username);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string>('https://via.placeholder.com/150');
+  const [previewUrl, setPreviewUrl] = useState<string>('https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-portrait-176256935.jpg');
 
   // Sync local state when the modal opens or user data changes
   useEffect(() => {
@@ -23,7 +23,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ currentUser,
       setSelectedFile(null); // Clear any previously selected file
       
       if (!currentUser.profileImageUrl) {
-        setPreviewUrl('https://via.placeholder.com/150');
+        setPreviewUrl('https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-portrait-176256935.jpg');
       } else if (typeof currentUser.profileImageUrl === 'string') {
         setPreviewUrl(getImageUrl(currentUser.profileImageUrl));
       } else if (currentUser.profileImageUrl instanceof File) {

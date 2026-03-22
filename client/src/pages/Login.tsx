@@ -70,7 +70,6 @@ const Login: React.FC = () => {
       const { accessToken, refreshToken, ...user } = response;
 
       login(user, accessToken, refreshToken);
-
       navigate('/');
     } catch (error: any) {
       setLoginErrorMsg("Google Sign-In failed on the server.");

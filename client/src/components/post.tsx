@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -18,6 +18,7 @@ import {
   Chip,
   Avatar
 } from '@mui/material';
+import likeService from '../services/likeService';
 
 // Icons
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -29,6 +30,7 @@ import RestaurantIcon from '@mui/icons-material/Restaurant';
 import type { PostType } from '../types/post';
 import { getImageUrl } from '../utils/imageUtils';
 import CommentsSection from './PostComment/CommentSection';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 
 interface PostProps {
   post: PostType;
@@ -36,9 +38,35 @@ interface PostProps {
 
 const Post: React.FC<PostProps> = ({ post }) => {
   const [open, setOpen] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
 
-  // TODO: Add comments count (either from the parent component or fetch here the comments this post)
+  // Fetch the likes count and status when the component mounts
+  useEffect(() => {
+    const fetchLikes = async () => {
+      try {
+        const data = await likeService.getPostLikes(post._id);
+        setLikesCount(data.count);
+        setIsSaved(data.hasLiked);
+      } catch (error) {
+        console.error("Failed to fetch likes:", error);
+      }
+    };
+    fetchLikes();
+  }, [post._id]);
+
+  const handleSavePost = async () => {
+    setIsSaved(!isSaved);
+    setLikesCount(prev => isSaved ? prev - 1 : prev + 1);
+
+    try {
+      await likeService.toggleLike(post._id, isSaved);
+    } catch (error) {
+      console.error("Failed to toggle like:", error);
+      setIsSaved(isSaved);
+      setLikesCount(prev => isSaved ? prev + 1 : prev - 1);
+    }
+  }
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -48,11 +76,6 @@ const Post: React.FC<PostProps> = ({ post }) => {
     e.stopPropagation();
     setOpen(false);
   };
-
-  const handleSavePost = () => {
-    setIsSaved(!isSaved);
-    // TODO: in the future add the rest of the logic to actually save it for the logged user
-  }
 
   const displayImage = getImageUrl(post.imagePath) || "https://upload.wikimedia.org/wikipedia/commons/a/a3/Image-not-found.png?_=20210521171500";
 
@@ -78,15 +101,15 @@ const Post: React.FC<PostProps> = ({ post }) => {
             <Box sx={{ position: 'relative', p: 1 }}>
 
               <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
-                <Avatar 
+                <Avatar
                   src={(post.userId && typeof post.userId !== 'string' && post.userId.profileImageUrl) ? getImageUrl(post.userId.profileImageUrl) : undefined}
                   sx={{ width: 32, height: 32, bgcolor: '#004d40' }}
                 >
-                  { (post.userId && typeof post.userId !== 'string') ? post.userId.username?.charAt(0) : '?'}
+                  {(post.userId && typeof post.userId !== 'string') ? post.userId.username?.charAt(0) : '?'}
                 </Avatar>
                 <Box>
                   <Typography variant="subtitle2" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
-                    { (post.userId && typeof post.userId !== 'string') ? post.userId.username : 'Unknown User'}
+                    {(post.userId && typeof post.userId !== 'string') ? post.userId.username : 'Unknown User'}
                   </Typography>
                   <Typography variant="caption" sx={{ color: '#999', fontSize: '0.75rem' }}>
                     {new Date(post.createdAt).toLocaleDateString()}
@@ -94,11 +117,11 @@ const Post: React.FC<PostProps> = ({ post }) => {
                 </Box>
                 <Box sx={{ flexGrow: 1 }} />
                 <Button
-                  startIcon={ isSaved ? <Favorite color="error" /> : <FavoriteBorderIcon/>}
-                  sx={{ 
-                    color: '#000', 
-                    textTransform: 'none', 
-                    border: '1px solid #ccc', 
+                  startIcon={isSaved ? <Favorite color="error" /> : <FavoriteBorderIcon />}
+                  sx={{
+                    color: '#000',
+                    textTransform: 'none',
+                    border: '1px solid #ccc',
                     borderRadius: '20px',
                     px: 2,
                     height: '32px',
@@ -139,13 +162,6 @@ const Post: React.FC<PostProps> = ({ post }) => {
 
               <Typography variant="body1" sx={{ mt: 3, mb: 3, color: '#444', lineHeight: 1.6 }}>
                 "{post.text}"
-                {/* <Box component="span" sx={{ fontWeight: 'bold', cursor: 'pointer', ml: 1, textDecoration: 'underline' }}>
-                  Read more
-                </Box> */}
-              </Typography>
-
-              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-                Details
               </Typography>
 
               <Stack direction="row" spacing={2} alignItems="center">
@@ -156,11 +172,11 @@ const Post: React.FC<PostProps> = ({ post }) => {
                 />
               </Stack>
 
-            </Box>
-          </Grid>
+            </Box >
+          </Grid >
 
           {/* Right Column: Image */}
-          <Grid size={{ xs: 12, md: 5 }}>
+          < Grid size={{ xs: 12, md: 5 }}>
             <Box sx={{ position: 'relative', height: '100%', minHeight: '300px' }}>
               <Box
                 component="img"
@@ -174,12 +190,12 @@ const Post: React.FC<PostProps> = ({ post }) => {
                 }}
               />
             </Box>
-          </Grid>
-        </Grid>
-      </Paper>
+          </Grid >
+        </Grid >
+      </Paper >
 
       {/* Popup / Modal */}
-      <Dialog
+      < Dialog
         open={open}
         onClose={handleClose}
         fullWidth
@@ -205,7 +221,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
             </ListItem>
           </List>
         </DialogContent> */}
-      </Dialog>
+      </Dialog >
     </>
   );
 };
