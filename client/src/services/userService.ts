@@ -51,7 +51,7 @@ export const logoutUser = (token: string) => {
     return new Promise<string>((resolve, reject) => {
         console.log(`logging out`);
 
-        apiClient.post('/api/auth/logout', token).then((response) => {
+        apiClient.post('/api/auth/logout', { token }).then((response) => {
             console.log(response);
             resolve(response.data);
         }).catch((error) => {
@@ -59,4 +59,8 @@ export const logoutUser = (token: string) => {
             reject(error);
         })
     })
+}
+
+export const getProfile = () => {
+    return apiClient.get<UserType>("/api/users/profile").then(res => res.data);
 }

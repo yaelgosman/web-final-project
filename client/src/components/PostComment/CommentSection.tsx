@@ -24,9 +24,10 @@ import commentService from '../../services/commentService';
 
 interface CommentsSectionProps {
   postId: string;
+  onCommentCountChange?: (newCount: number) => void;
 }
 
-const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
+const CommentsSection: React.FC<CommentsSectionProps> = ({ postId, onCommentCountChange }) => {
   const { user } = useAuth();
   const [comments, setComments] = useState<CommentType[]>([]);
   const [commentText, setCommentText] = useState("");
@@ -63,7 +64,12 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
         const newComment = await commentService.createComment(postId, commentText);
         
         // Adds the new comment to the bottom of the list instantly
-        setComments((prev) => [...prev, newComment]);
+        const updatedComments = [...comments, newComment];
+        setComments(updatedComments);
+        
+        if (onCommentCountChange) {
+          onCommentCountChange(updatedComments.length);
+        }
       }
       setCommentText("");
     } catch (error) {
@@ -84,7 +90,12 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
       await commentService.deleteComment(commentId);
       
       // Remove it from the UI instantly
-      setComments((prev) => prev.filter((c) => c._id !== commentId));
+      const updatedComments = comments.filter((c) => c._id !== commentId);
+      setComments(updatedComments);
+
+      if (onCommentCountChange) {
+        onCommentCountChange(updatedComments.length);
+      }
     } catch (error) {
       console.error("Failed to delete comment:", error);
     }

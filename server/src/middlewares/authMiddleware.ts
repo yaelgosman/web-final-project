@@ -30,3 +30,29 @@ export const authenticate = (
     return res.status(401).json({ error: "Invalid token" });
   }
 };
+
+export const optionalAuthenticate = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return next();
+  }
+
+  const token = authHeader.split(" ")[1];
+  if (!token) return next();
+
+  try {
+    const payload: any = jwt.verify(
+      token,
+      process.env.ACCESS_TOKEN_SECRET || "access_secret"
+    );
+    req.userId = payload.userId;
+    next();
+  } catch (err) {
+    // If token is invalid, we just proceed without userId
+    next();
+  }
+};

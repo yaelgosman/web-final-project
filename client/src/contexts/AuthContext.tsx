@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
 import { UserType } from '../types/user';
+import { getProfile } from '../services/userService';
 
 interface AuthContextType {
     user: UserType | null;
@@ -21,7 +22,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         if (storedUser && storedUser !== "undefined" && token) {
             try {
-                setUser(JSON.parse(storedUser));
+                const parsedUser = JSON.parse(storedUser);
+                setUser(parsedUser);
+
+                // Verify session with server
+                getProfile().then((updatedUser) => {
+                    setUser(updatedUser);
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                }).catch((error) => {
+                    console.error("Session verification failed", error);
+                    // logout() is handled by apiClient interceptor if it returns 401
+                    // But we can also call it here for safety if the error is terminal
+                    if (error.response?.status === 401) {
+                        logout();
+                    }
+                });
             } catch (error) {
                 console.error("Failed to parse user", error);
                 logout(); // אם המידע פגום, ננקה הכל

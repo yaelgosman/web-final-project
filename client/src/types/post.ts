@@ -13,7 +13,7 @@ export interface PostType {
   text: string;
   category: string;
   imagePath?: string; 
+  likesCount: number;
+  commentsCount: number;
   createdAt: string;
-  updatedAt: string;
-  commentsCount?: number;
 }

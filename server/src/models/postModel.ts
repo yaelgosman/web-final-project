@@ -10,7 +10,8 @@ export interface IPost extends Document {
   text: string;
   category: string;
   imagePath?: string;
-  commentsCount?: number;
+  likesCount: number;
+  commentsCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,6 +35,8 @@ const postSchema = new Schema<IPost>(
       default: 'informal'
     },
     imagePath: { type: String },
+    likesCount: { type: Number, default: 0 },
+    commentsCount: { type: Number, default: 0 },
   },
   {
     timestamps: true,
@@ -42,12 +45,5 @@ const postSchema = new Schema<IPost>(
   }
 );
 
-// This tells Mongoose: "Go to the Comment model, find every comment where the 'postId' matches this post's '_id', and give me the total count."
-postSchema.virtual("commentsCount", {
-  ref: "Comment",
-  localField: "_id",
-  foreignField: "postId",
-  count: true            
-});
 
 export default model<IPost>("Post", postSchema);

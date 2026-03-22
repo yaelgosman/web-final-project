@@ -1,11 +1,16 @@
 import { Request, Response } from "express";
 import Like from "../models/likeModel";
+import Post from "../models/postModel";
 import { AuthRequest } from "../middlewares/authMiddleware";
 
 export const likePost = async (req: AuthRequest, res: Response) => {
   const { postId } = req.body;
   try {
     const like = await Like.create({ postId, userId: req.userId });
+    
+    // Increment likesCount on Post
+    await Post.findByIdAndUpdate(postId, { $inc: { likesCount: 1 } });
+    
     res.json(like);
   } catch (err) {
     res.status(400).json({ error: "Already liked" });
@@ -14,7 +19,13 @@ export const likePost = async (req: AuthRequest, res: Response) => {
 
 export const unlikePost = async (req: AuthRequest, res: Response) => {
   const { postId } = req.body;
-  await Like.deleteOne({ postId, userId: req.userId });
+  const result = await Like.deleteOne({ postId, userId: req.userId });
+  
+  if (result.deletedCount > 0) {
+    // Decrement likesCount on Post
+    await Post.findByIdAndUpdate(postId, { $inc: { likesCount: -1 } });
+  }
+  
   res.json({ message: "Unliked" });
 };
 
