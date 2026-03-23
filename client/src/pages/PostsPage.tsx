@@ -1,60 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Stack, Box, Typography, CircularProgress } from '@mui/material';
+import { Container, Stack, Box, Typography, CircularProgress, Grid, Button } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import Post from '../components/post';
 import type { PostType } from '../types/post';
-import Navbar from '../components/Navbar';
+import CategoryFilter from '../components/CategoryFilter';
 import { CATEGORIES } from '../constants/categories';
+import postService from '../services/postService';
+import SmartSearchBar from '../components/SmartSearchBar';
 
-// --- Mock Data Service (Simulating an API fetch) ---
-const fetchPosts = (): Promise<PostType[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        {
-            _id: "post_001",
-            userId: "user_999",
-            restaurant: {
-                name: "Restô Canto",
-                city: "Búzios, Brazil"
-            },
-            rating: 5,
-            text: "What could be better than an ocean view and fresh fruit? The grilled octopus is a must-try. Loved the atmosphere!",
-            imagePath: "https://images.unsplash.com/photo-1544148103-0773bf10d330?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        },
-        {
-          _id: "post_03",
-          userId: "user_101",
-          restaurant: {
-            name: "The Witchery by the Castle",
-            city: "Edinburgh, United Kingdom"
-          },
-          rating: 4.2,
-          text: "Located in a historic setting with dramatic decor (think gothic), definitely worth a stop. Fresh fish and creative cocktails are the main event, but it's also recommended to save room for dessert. Diners say this is out of this world.",
-          imagePath: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // Placeholder for interior
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        },
-        {
-          _id: "post_04",
-          userId: "user_102",
-          restaurant: {
-            name: "Abrasado",
-            city: "Guaymallen, Argentina"
-          },
-          rating: 4.9,
-          text: "Abrasado is a stunning place with outdoor seating. You can't miss the dry-aged steak - it's the brand concept. Excellent cocktails and a great selection of wines. Polite and professional service, which makes the experience even better.",
-          imagePath: "https://images.unsplash.com/photo-1600891964092-4316c288032e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // Placeholder for steak
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-      ]);
-    }, 800); // Simulate network delay
-  });
-};
+import { useNavigate } from 'react-router-dom';
 
 const PostPage: React.FC = () => {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<PostType[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -66,11 +23,37 @@ const PostPage: React.FC = () => {
     console.log('Changed category!');
   }
 
+  const handleSearch = async (query: string) => {
+    setLoading(true);
+    try {
+      const data = await postService.getAllPosts(query);
+      setPosts(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAISearch = async (query: string) => {
+    if (!query) return handleSearch('');
+    setLoading(true);
+    try {
+      const data = await postService.aiSearch(query);
+      setPosts(data);
+    } catch (err) {
+      console.error("AI Search failed", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // Fetch data on component mount
+    // Fetch data whenever category changes
     const loadPosts = async () => {
+      setLoading(true);
       try {
-        const data = await fetchPosts();
+        const data = await postService.getAllPosts('', selectedCategory);
         setPosts(data);
       } catch (error) {
         console.error("Failed to fetch posts", error);
@@ -79,12 +62,8 @@ const PostPage: React.FC = () => {
       }
     };
     loadPosts();
-  }, []);
+  }, [selectedCategory]);
 
-  // const displayPosts = posts.filter(post => {
-  //     // Example: return post.category === selectedCategory
-  //     return true; 
-  // });
 
   if (loading) {
     return (
@@ -95,24 +74,53 @@ const PostPage: React.FC = () => {
   }
 
   return (
-    <Box>
-        <Box sx={{ position: 'sticky', top: 0, zIndex: 1100, bgcolor: 'white' }}>
-            <Navbar
-              selectedCategory={selectedCategory} 
-              onSelectCategory={handleSelectedCategory} 
-            />
-        </Box>
+    <Box sx={{ bgcolor: '#fdfbf7', minHeight: '100vh', pb: 8 }}>
 
-        <Container maxWidth="lg" sx={{ mt: 2, mb: 8 }}>
-        <Stack spacing={4}>
-          {posts.map((post) => (
-             <Box key={post._id} sx={{ position: 'relative' }}>
-                <Typography variant="caption" sx={{ position: 'absolute', top: -10, right: 0, color: '#999', fontSize: '1rem' }}>
-                </Typography>
-                <Post post={post} />
-             </Box>
-          ))}
-        </Stack>
+      <Box sx={{ bgcolor: '#fff', pt: 4, pb: 2, borderBottom: '1px solid #eee' }}>
+        <Container maxWidth="md">
+          <Typography variant="h3" sx={{
+            textAlign: 'center',
+            fontFamily: 'serif',
+            fontWeight: 900,
+            mb: 3,
+            color: '#2c3e50'
+          }}>
+            What are we eating today?
+          </Typography>
+
+          <SmartSearchBar
+            onSearch={handleSearch}
+            onAISearch={handleAISearch}
+          />
+
+          <Box sx={{ mt: 3 }}>
+            <CategoryFilter selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
+          </Box>
+        </Container>
+      </Box>
+
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Grid container spacing={4}>
+
+          <Grid item xs={12} md={8} sx={{ mx: 'auto' }}>
+
+            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'flex-end' }}>
+              <Button
+                variant="contained"
+                onClick={() => navigate('/addReview')}
+                startIcon={<EditIcon />}
+                sx={{ bgcolor: '#004d40', borderRadius: '24px', px: 3, py: 1, textTransform: 'none', fontWeight: 'bold', '&:hover': { bgcolor: '#00332c' } }}
+              >
+                Write a Review
+              </Button>
+            </Box>
+
+            <Stack spacing={4}>
+              {posts.map(post => <Post key={post._id} post={post} />)}
+            </Stack>
+
+          </Grid>
+        </Grid>
       </Container>
     </Box>
   );

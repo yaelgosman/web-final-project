@@ -7,7 +7,7 @@ export const registerUser = (user: UserType) => {
         console.log('registering user');
         console.log(user);
 
-        apiClient.post("/auth/register", user).then((response) => {
+        apiClient.post("/api/auth/register", user).then((response) => {
             console.log(response);
             resolve(response.data);
         }).catch((error) => {
@@ -17,14 +17,12 @@ export const registerUser = (user: UserType) => {
     })
 }
 
-
-// TODO: check if the path is valid!
 export const googleSignIn = (credintialResponse: CredentialResponse) => {
     return new Promise<UserType>((resolve, reject) => {
         console.log('Google Sign in');
         console.log(credintialResponse);
 
-        apiClient.post("/auth/google", credintialResponse).then((response) => {
+        apiClient.post("/api/auth/google", credintialResponse).then((response) => {
             console.log(response);
             resolve(response.data);
         }).catch((error) => {
@@ -39,7 +37,7 @@ export const loginUser = (user: UserType) => {
         console.log(`user login`);
         console.log(user);
 
-        apiClient.post('/auth/login', user).then((response) => {
+        apiClient.post('/api/auth/login', user).then((response) => {
             console.log(response);
             resolve(response.data);
         }).catch((error) => {
@@ -53,7 +51,7 @@ export const logoutUser = (token: string) => {
     return new Promise<string>((resolve, reject) => {
         console.log(`logging out`);
 
-        apiClient.post('/auth/logout', token).then((response) => {
+        apiClient.post('/api/auth/logout', { token }).then((response) => {
             console.log(response);
             resolve(response.data);
         }).catch((error) => {
@@ -61,4 +59,8 @@ export const logoutUser = (token: string) => {
             reject(error);
         })
     })
+}
+
+export const getProfile = () => {
+    return apiClient.get<UserType>("/api/users/profile").then(res => res.data);
 }

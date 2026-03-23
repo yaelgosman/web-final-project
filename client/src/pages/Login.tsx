@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import {
   Box,
@@ -13,12 +14,11 @@ import {
 } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import LoginIcon from '@mui/icons-material/Login';
 import { Link, useNavigate } from 'react-router-dom';
 import { INVALID_LOGIN_ERRORS } from '../constants/errors';
 import { useAuth } from '../contexts/AuthContext';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
-import { jwtDecode } from "jwt-decode";
+import { loginUser, googleSignIn } from '../services/userService';
 
 const Login: React.FC = () => {
   const navigate = useNavigate(); // Hook for navigation
@@ -27,64 +27,54 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginErrorMsg, setLoginErrorMsg] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login with:", { email, password });
+    setLoginErrorMsg('');
 
-    if (email === '' || password === '') {
+    if (!email || !password) {
       setLoginErrorMsg(INVALID_LOGIN_ERRORS.EMPTY_CREDENTIALS);
       return;
     }
 
-    // TODO: add here the call to the Login request + Navigate to home page if valid!
+    try {
+      setIsLoading(true);
 
-    const mockupUserToValidate = { email: 'e@gmail.com', password: '123' };
+      // Pass the user credentials.
+      const response: any = await loginUser({ email, password } as any);
 
-    if ( email !== mockupUserToValidate.email || password !== mockupUserToValidate.password ) {
-      setLoginErrorMsg(INVALID_LOGIN_ERRORS.INVALID_CREDENTIALS);
-      return;
+      const user = response.user || response;
+      const token = response.accessToken || "temp-token";
+
+      // console.log(`user: `, user);
+      login(user, token, response?.refreshToken); // Update context
+
+      // Navigate to home
+      navigate('/');
+
+    } catch (error: any) {
+      console.error("Login Error:", error);
+      setLoginErrorMsg(error.response?.data?.message || INVALID_LOGIN_ERRORS.INVALID_CREDENTIALS);
+    } finally {
+      setIsLoading(false);
     }
-
-    // --- Mock Data simulating API response ---
-    const mockUserResponse = {
-      _id: "123",
-      username: "Bobby",
-      email: email,
-      provider: "local" as const,
-      profileImage: "https://mui.com/static/images/avatar/2.jpg" // Dummy image
-    };
-    const mockToken = "abc-123-token";
-
-    login(mockUserResponse, mockToken);
-
-    // --- MOCK LOGIN SUCCESS ---
-    // localStorage.setItem('token', 'dummy_token'); // Simulate Auth Token
-    navigate('/'); // Navigate to the Posts page (Home)
   };
 
-  const onGoogleLoginSuccess = (credentialResponse: CredentialResponse) => {
-    console.log(credentialResponse);
 
-    if (credentialResponse.credential) {
-      // Decode the Google JWT to get the user's details
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const decodedToken: any = jwtDecode(credentialResponse.credential);
-      
-      // Map Google's data to match our User structure
-      const googleUser = {
-        _id: decodedToken.sub, // Google's unique identifier for the user
-        username: decodedToken.name,
-        email: decodedToken.email,
-        provider: "google" as const,
-        profileImage: decodedToken.picture // Get their actual Google pfp
-      };
+  const onGoogleLoginSuccess = async (credentialResponse: CredentialResponse) => {
+    try {
+      setIsLoading(true);
+      const response: any = await googleSignIn(credentialResponse);
 
-      // Update the AuthContext (This is updates the Navbar state)
-      login(googleUser, credentialResponse.credential);
+      const { accessToken, refreshToken, ...user } = response;
 
-      localStorage.setItem('token', credentialResponse.credential);
+      login(user, accessToken, refreshToken);
       navigate('/');
+    } catch (error: any) {
+      setLoginErrorMsg("Google Sign-In failed on the server.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -94,13 +84,14 @@ const Login: React.FC = () => {
 
   return (
     <Container maxWidth="sm" sx={{ mt: 8, mb: 4 }}>
-      <Paper 
-        elevation={0} 
-        sx={{ 
-          p: 4, 
-          borderRadius: 2, 
-          border: '1px solid #e0e0e0',
-          boxShadow: '0px 4px 20px rgba(0,0,0,0.05)' 
+      <Paper
+        elevation={0}
+        sx={{
+          p: 5,
+          borderRadius: 4,
+          border: 'none',
+          backgroundColor: '#fdfbf7',
+          boxShadow: '0px 10px 30px rgba(0,0,0,0.08)'
         }}
       >
         <Box sx={{ textAlign: 'center', mb: 3 }}>
@@ -120,9 +111,9 @@ const Login: React.FC = () => {
               variant="outlined"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3 } }}
             />
-            
+
             <TextField
               label="Password"
               type={showPassword ? 'text' : 'password'}
@@ -130,7 +121,7 @@ const Login: React.FC = () => {
               variant="outlined"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3 } }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -145,27 +136,26 @@ const Login: React.FC = () => {
               }}
             />
 
+
             <Button
               type="submit"
               variant="contained"
               fullWidth
               size="large"
-              startIcon={<LoginIcon />}
               sx={{
+                mt: 2,
                 bgcolor: '#004d40',
-                color: '#fff',
-                borderRadius: '20px',
-                py: 1.5,
-                fontWeight: 'bold',
-                textTransform: 'none',
-                '&:hover': { bgcolor: '#00382e' },
+                borderRadius: 8,
+                py: 1.8,
+                fontSize: '1.1rem',
+                '&:hover': { bgcolor: '#00332c' }
               }}
             >
-              Sign In
+              {isLoading ? 'Signing In...' : 'Sign In'}
             </Button>
 
             {
-              (loginErrorMsg != '') && 
+              (loginErrorMsg != '') &&
               <Typography variant="body1" color="error" sx={{ alignSelf: 'center', fontWeight: 'bold', direction: 'rtl' }}>
                 {loginErrorMsg}
               </Typography>
@@ -181,7 +171,7 @@ const Login: React.FC = () => {
           </Divider>
         </Box>
 
-        <Stack direction="row" spacing={2} justifyContent="center">        
+        <Stack direction="row" spacing={2} justifyContent="center">
           <GoogleLogin onSuccess={onGoogleLoginSuccess} onError={onGoogleLoginFailiure} />
         </Stack>
 
@@ -196,7 +186,7 @@ const Login: React.FC = () => {
           </Typography>
         </Box>
       </Paper>
-    </Container>
+    </Container >
   );
 };
 
