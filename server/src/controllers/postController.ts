@@ -25,6 +25,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
       restaurant: parsedRestaurant,
       rating: Number(rating),
       text,
+      category,
       imagePath,
     });
     res.status(201).json(post);
@@ -72,6 +73,7 @@ export const updatePost = async (req: AuthRequest, res: Response) => {
     // Update text and rating if they exist
     if (req.body?.text) post.text = req.body.text;
     if (req.body?.rating) post.rating = Number(req.body.rating);
+    if (req.body?.category) post.category = req.body.category;
 
     // Parse and update the restaurant object safely
     if (req.body?.restaurant) {
