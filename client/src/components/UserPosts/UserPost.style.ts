@@ -55,6 +55,17 @@ export const restaurantCity: React.CSSProperties = {
   opacity: 0.9
 };
 
+export const postDescription: React.CSSProperties = {
+  margin: '4px 0 0 0',
+  fontSize: '13px',
+  opacity: 0.85,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  display: '-webkit-box',
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: 'vertical'
+};
+
 export const actionsContainer: React.CSSProperties = {
   position: 'absolute',
   top: '8px',

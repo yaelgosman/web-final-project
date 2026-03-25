@@ -7,12 +7,8 @@ import {
   Rating,
   Dialog,
   DialogTitle,
-  DialogContent,
   IconButton,
   Divider,
-  List,
-  ListItem,
-  ListItemText,
   Paper,
   Chip,
   Avatar
@@ -22,8 +18,8 @@ import likeService from '../services/likeService';
 // Icons
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { Favorite } from '@mui/icons-material';
-import CircleIcon from '@mui/icons-material/Circle';
 import CloseIcon from '@mui/icons-material/Close';
+import CircleIcon from '@mui/icons-material/Circle';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import type { PostType } from '../types/post';
 import { getImageUrl } from '../utils/imageUtils';
@@ -88,72 +84,31 @@ const Post: React.FC<PostProps> = ({ post }) => {
   return (
     <>
       <Paper
-        elevation={2}
+        elevation={0}
         sx={{
           p: 0,
-          borderRadius: 4,
+          borderRadius: 3,
           overflow: 'hidden',
-          transition: 'transform 0.2s, box-shadow 0.2s',
+          transition: 'box-shadow 0.2s',
           '&:hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: '0px 8px 30px rgba(0,0,0,0.12)',
+            boxShadow: '0px 12px 36px rgba(0,0,0,0.08)',
           },
           bgcolor: '#fff',
-          border: '1px solid #eee'
+          border: '1px solid #eaeaea',
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          mb: 4
         }}
       >
-        <Box sx={{ p: 2 }}>
-          {/* Header */}
-          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
-            <Avatar
-              src={(post.userId && typeof post.userId !== 'string' && post.userId.profileImageUrl) ? getImageUrl(post.userId.profileImageUrl) : undefined}
-              sx={{ width: 40, height: 40, bgcolor: '#004d40', border: '2px solid #fff' }}
-            >
-              {(post.userId && typeof post.userId !== 'string') ? post.userId.username?.charAt(0) : '?'}
-            </Avatar>
-            <Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2, color: '#333' }}>
-                {(post.userId && typeof post.userId !== 'string') ? post.userId.username : 'Unknown User'}
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#888', fontSize: '0.75rem' }}>
-                {new Date(post.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-              </Typography>
-            </Box>
-          </Stack>
-
-          {/* Title and Rating */}
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-            <Typography variant="h5" sx={{ fontWeight: 800, color: '#1a1a1a', fontFamily: 'Inter, sans-serif' }}>
-              {post.restaurant.name}
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: '#f0f9f6', px: 1, py: 0.5, borderRadius: 1.5 }}>
-              <Rating
-                value={post.rating}
-                readOnly
-                size="small"
-                icon={<CircleIcon fontSize="inherit" />}
-                emptyIcon={<CircleIcon fontSize="inherit" />}
-                sx={{ color: '#00aa6c' }}
-              />
-              <Typography variant="caption" sx={{ ml: 0.5, fontWeight: 'bold', color: '#00aa6c' }}>
-                {post.rating}
-              </Typography>
-            </Box>
-          </Stack>
-
-          {/* Text Content */}
-          <Typography variant="body1" sx={{ mt: 1.5, mb: 2, color: '#444', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-            {post.text}
-          </Typography>
-        </Box>
-
-        {/* Image */}
-        <Box 
+        {/* Image Box */}
+        <Box
           onClick={handleClickOpen}
-          sx={{ 
-            height: '240px', 
-            width: '100%', 
-            overflow: 'hidden', 
+          sx={{
+            width: { xs: '100%', sm: 300, md: 340 },
+            height: { xs: 240, sm: 'auto' },
+            minHeight: { sm: 260 },
+            flexShrink: 0,
+            overflow: 'hidden',
             cursor: 'pointer',
             position: 'relative'
           }}
@@ -166,59 +121,78 @@ const Post: React.FC<PostProps> = ({ post }) => {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              transition: 'transform 0.5s',
+              transition: 'transform 0.6s ease',
               '&:hover': {
-                transform: 'scale(1.05)'
+                transform: 'scale(1.04)'
               }
             }}
           />
         </Box>
 
-        {/* Footer Actions */}
-        <Stack direction="row" spacing={2} sx={{ p: 1.5, borderTop: '1px solid #f5f5f5' }} alignItems="center">
-          <Button
-            size="small"
-            startIcon={isSaved ? <Favorite color="error" /> : <FavoriteBorderIcon />}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleSavePost();
-            }}
-            sx={{ 
-              color: isSaved ? '#d32f2f' : '#666',
-              textTransform: 'none',
-              fontWeight: 600,
-              '&:hover': { bgcolor: isSaved ? 'rgba(211, 47, 47, 0.04)' : 'rgba(0,0,0,0.04)' }
-            }}
-          >
-            {likesCount} {likesCount === 1 ? 'Like' : 'Likes'}
-          </Button>
+        {/* Content Box */}
+        <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1 }}>
+            <Typography variant="h5" sx={{ fontWeight: 800, color: '#1a1a1a', fontFamily: 'Inter, sans-serif' }}>
+              {post.restaurant.name}
+            </Typography>
+            <Button
+              size="small"
+              onClick={(e) => { e.stopPropagation(); handleSavePost(); }}
+              startIcon={isSaved ? <Favorite color="error" /> : <FavoriteBorderIcon />}
+              sx={{ mt: -0.5, mr: -1, color: isSaved ? '#d32f2f' : '#666', textTransform: 'none', fontWeight: 'bold' }}
+            >
+              {likesCount} {likesCount === 1 ? 'Like' : 'Likes'}
+            </Button>
+          </Stack>
 
-          <Button
-            size="small"
-            startIcon={<ChatBubbleOutlineIcon />}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleClickOpen();
-            }}
-            sx={{ 
-              color: '#666',
-              textTransform: 'none',
-              fontWeight: 600,
-              '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
-            }}
-          >
-            {commentsCount} {commentsCount === 1 ? 'Comment' : 'Comments'}
-          </Button>
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+            <Rating value={post.rating} readOnly size="small" sx={{ color: '#00aa6c' }} />
+            <Typography variant="body2" sx={{ fontWeight: 800, color: '#333' }}>{post.rating}</Typography>
+            <Typography variant="body2" sx={{ color: '#555', textDecoration: 'underline' }}>
+              ({commentsCount} {commentsCount === 1 ? 'comment' : 'comments'})
+            </Typography>
+          </Stack>
+
+          <Typography variant="body2" sx={{ color: '#555', mb: 2, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <RestaurantIcon fontSize="small" sx={{ color: '#888' }} />
+            {post.category && post.category !== 'informal' ? post.category.charAt(0).toUpperCase() + post.category.slice(1) : 'Mediterranean, Middle Eastern'} • $$ - $$$ • {post.restaurant.city}
+          </Typography>
+
+          <Divider sx={{ mb: 2 }} />
+
+          {/* User Review Excerpt */}
+          <Box sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
+            <Avatar
+              src={(post.userId && typeof post.userId !== 'string' && post.userId.profileImageUrl) ? getImageUrl(post.userId.profileImageUrl) : undefined}
+              sx={{ width: 28, height: 28, border: '1px solid #eee' }}
+            >
+              {(post.userId && typeof post.userId !== 'string') ? post.userId.username?.charAt(0) : '?'}
+            </Avatar>
+            <Typography variant="body2" sx={{ color: '#444', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              "{post.text}"
+            </Typography>
+          </Box>
 
           <Box sx={{ flexGrow: 1 }} />
-          
-          <Chip
-            size="small"
-            icon={<RestaurantIcon sx={{ fontSize: '0.9rem !important' }} />}
-            label="Verified"
-            sx={{ bgcolor: '#f2fcf9', color: '#00aa6c', fontWeight: 'bold' }}
-          />
-        </Stack>
+
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Button
+              variant="outlined"
+              size="small"
+              sx={{ textTransform: 'none', borderRadius: 2, color: '#333', borderColor: '#ccc', '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' } }}
+              startIcon={<ChatBubbleOutlineIcon />}
+              onClick={handleClickOpen}
+            >
+              Read Comments
+            </Button>
+            <Chip
+              size="small"
+              label="Open now"
+              icon={<CircleIcon sx={{ fontSize: '10px !important', color: '#00aa6c !important' }} />}
+              sx={{ bgcolor: 'transparent', color: '#00aa6c', fontWeight: 'bold' }}
+            />
+          </Stack>
+        </Box>
       </Paper>
 
       {/* Popup / Modal */}
@@ -235,9 +209,9 @@ const Post: React.FC<PostProps> = ({ post }) => {
           }
         }}
       >
-        <DialogTitle sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
+        <DialogTitle sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'center',
           fontWeight: 800,
           pb: 1,
@@ -250,8 +224,8 @@ const Post: React.FC<PostProps> = ({ post }) => {
         </DialogTitle>
         <Divider />
 
-        <CommentsSection 
-          postId={post._id} 
+        <CommentsSection
+          post={post}
           onCommentCountChange={(newCount) => setCommentsCount(newCount)}
         />
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Stack, Box, Typography, CircularProgress, Grid, Button } from '@mui/material';
+import { Container, Box, Typography, CircularProgress, Stack, Button } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import Post from '../components/post';
 import type { PostType } from '../types/post';
@@ -17,11 +17,6 @@ const PostPage: React.FC = () => {
 
   // State for the filter. Default to the first category.
   const [selectedCategory, setSelectedCategory] = useState<string>(CATEGORIES[0].id);
-
-  const handleSelectedCategory = (id: string) => {
-    setSelectedCategory(id);
-    console.log('Changed category!');
-  }
 
   const handleSearch = async (query: string) => {
     setLoading(true);
@@ -100,27 +95,22 @@ const PostPage: React.FC = () => {
       </Box>
 
       <Container maxWidth="lg" sx={{ mt: 4 }}>
-        <Grid container spacing={4}>
+        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'flex-end' }}>
+          <Button
+            variant="contained"
+            onClick={() => navigate('/addReview')}
+            startIcon={<EditIcon />}
+            sx={{ bgcolor: '#004d40', borderRadius: '24px', px: 3, py: 1, textTransform: 'none', fontWeight: 'bold', '&:hover': { bgcolor: '#00332c' }, boxShadow: '0 4px 14px 0 rgba(0, 77, 64, 0.39)' }}
+          >
+            Write a Review
+          </Button>
+        </Box>
 
-          <Grid item xs={12} md={8} sx={{ mx: 'auto' }}>
-
-            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'flex-end' }}>
-              <Button
-                variant="contained"
-                onClick={() => navigate('/addReview')}
-                startIcon={<EditIcon />}
-                sx={{ bgcolor: '#004d40', borderRadius: '24px', px: 3, py: 1, textTransform: 'none', fontWeight: 'bold', '&:hover': { bgcolor: '#00332c' } }}
-              >
-                Write a Review
-              </Button>
-            </Box>
-
-            <Stack spacing={4}>
-              {posts.map(post => <Post key={post._id} post={post} />)}
-            </Stack>
-
-          </Grid>
-        </Grid>
+        <Stack spacing={4} sx={{ maxWidth: '800px', mx: 'auto' }}>
+          {posts.map(post => (
+            <Post key={post._id} post={post} />
+          ))}
+        </Stack>
       </Container>
     </Box>
   );

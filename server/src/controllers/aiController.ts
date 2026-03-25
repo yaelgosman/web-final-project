@@ -14,9 +14,11 @@ export const smartSearch = async (req: Request, res: Response) => {
         const { query } = req.body;
         const prompt = `
       Extract search filters from this user request: "${query}".
-      Return ONLY a JSON object with keys: "city", "cuisine", "minRating".
-      Example: "I want spicy pasta in Tel Aviv with at least 4 stars" -> {"city": "Tel Aviv", "cuisine": "spicy pasta", "minRating": 4}
-      If a field is missing, use null.
+      Return ONLY a JSON object with keys: "city", "keywords", "minRating".
+      Example 1: "I want spicy pasta in Tel Aviv with at least 4 stars" -> {"city": "Tel Aviv", "keywords": ["spicy pasta", "italian", "noodles"], "minRating": 4}
+      Example 2: "Where can I find some good meat?" -> {"city": null, "keywords": ["meat", "burger", "steak", "bbq", "beef"], "minRating": null}
+      The "keywords" field should be an array of strings representing the main food/restaurant requested, PLUS close synonyms or specific dishes related to it.
+      If a field is missing, use null (or empty array for keywords).
     `;
 
         let result;
@@ -68,12 +70,11 @@ export const smartSearch = async (req: Request, res: Response) => {
             mongoQuery["restaurant.city"] = new RegExp(escapeRegExp(filters.city), 'i');
         }
 
-        if (filters.cuisine && typeof filters.cuisine === 'string' && filters.cuisine.toLowerCase() !== 'null') {
-            const cuisineRegex = new RegExp(escapeRegExp(filters.cuisine), 'i');
-            // Search in both restaurant name and post text
+        if (filters.keywords && Array.isArray(filters.keywords) && filters.keywords.length > 0) {
+            const regexes = filters.keywords.map((kw: string) => new RegExp(escapeRegExp(kw), 'i'));
             mongoQuery.$or = [
-                { "restaurant.name": cuisineRegex },
-                { "text": cuisineRegex }
+                { "restaurant.name": { $in: regexes } },
+                { "text": { $in: regexes } }
             ];
         }
 

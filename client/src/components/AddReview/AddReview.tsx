@@ -20,6 +20,7 @@ import { CATEGORIES } from '../../constants/categories';
 interface AddReviewProps {
   userId: string;
   onPostSuccess?: () => void;
+  onCancel?: () => void;
   initialData?: PostType;
 }
 
@@ -133,7 +134,7 @@ const AddReview: React.FC<AddReviewProps> = ({ userId, onPostSuccess, initialDat
   return (
     <Paper elevation={3} sx={styles.paperContainer}>
       <Typography variant="h5" fontWeight="bold" gutterBottom>
-        Write a Review
+        {initialData ? "Edit Your Review" : "Write a Review"}
       </Typography>
 
       <form onSubmit={handleSubmit}>
@@ -222,16 +223,28 @@ const AddReview: React.FC<AddReviewProps> = ({ userId, onPostSuccess, initialDat
           />
         </Box>
 
-
-        <Button
-          type="submit"
-          variant="contained"
-          fullWidth
-          disabled={isSubmitting}
-          sx={styles.submitButton}
-        >
-          {isSubmitting ? 'Posting...' : 'Post Review'}
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+          {initialData && (
+            <Button
+              type="button"
+              variant="outlined"
+              fullWidth
+              onClick={() => { if (onPostSuccess) onPostSuccess(); }}
+              sx={{ py: 1.5, borderRadius: 2, fontWeight: 'bold' }}
+            >
+              Cancel
+            </Button>
+          )}
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            disabled={isSubmitting}
+            sx={{ ...styles.submitButton, mt: 0 }}
+          >
+            {isSubmitting ? (initialData ? 'Saving...' : 'Posting...') : (initialData ? 'Save Changes' : 'Post Review')}
+          </Button>
+        </Box>
       </form>
     </Paper>
   );

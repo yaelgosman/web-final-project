@@ -24,10 +24,11 @@ const EditReviewPage: React.FC = () => {
   }
 
   return (
-    <AddReview 
-      userId={user._id} 
-      initialData={post} 
-      onPostSuccess={() => navigate('/profile')} // Go back to profile when done
+    <AddReview
+      userId={user._id}
+      initialData={post}
+      onPostSuccess={() => navigate('/profile')}
+      onCancel={() => navigate(-1)}
     />
   );
 };
