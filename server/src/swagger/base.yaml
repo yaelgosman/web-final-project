@@ -62,6 +62,8 @@ components:
               type: string
             city:
               type: string
+        category:
+          type: string
         rating:
           type: number
         text:
@@ -74,6 +76,19 @@ components:
         updatedAt:
           type: string
           format: date-time
+    PaginatedPostsResponse:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Post"
+        totalPages:
+          type: number
+        currentPage:
+          type: number
+        totalPosts:
+          type: number
     Comment:
       type: object
       properties:

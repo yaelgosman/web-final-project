@@ -1,23 +1,38 @@
 paths:
   /api/posts:
     get:
-      summary: Get all posts
+      summary: Get all posts (with pagination and filters)
       tags: [Posts]
       parameters:
         - in: query
-          name: sender
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 5
+          description: Posts per page
+        - in: query
+          name: search
           schema:
             type: string
-          description: Filter by user ID
+          description: Search by restaurant name or review text
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Filter by category (e.g. informal, formal, street food)
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Post"
+                $ref: "#/components/schemas/PaginatedPostsResponse"
     post:
       summary: Create a post
       tags: [Posts]
@@ -29,7 +44,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: [restaurant, rating, text]
+              required: [restaurant, rating, text, category]
               properties:
                 restaurant:
                   type: object
@@ -39,6 +54,8 @@ paths:
                       type: string
                     city:
                       type: string
+                category:
+                  type: string
                 rating:
                   type: number
                 text:
@@ -50,6 +67,26 @@ paths:
           description: Post created
         "401":
           description: Unauthorized
+
+  /api/posts/user/{userId}:
+    get:
+      summary: Get posts by user ID
+      tags: [Posts]
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
 
   /api/posts/{id}:
     put:
@@ -77,6 +114,8 @@ paths:
                       type: string
                     city:
                       type: string
+                category:
+                  type: string
                 rating:
                   type: number
                 text:
