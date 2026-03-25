@@ -40,7 +40,7 @@ const escapeRegExp = (string: string) => {
 };
 
 export const getPosts = async (req: Request, res: Response) => {
-  const { search, category } = req.query;
+  const { search, category, page = '1', limit = '10' } = req.query;
 
   const mongoQuery: any = {};
   if (search && typeof search === "string") {
@@ -56,10 +56,29 @@ export const getPosts = async (req: Request, res: Response) => {
     mongoQuery.category = category;
   }
 
-  const posts = await Post.find(mongoQuery)
-    .populate("userId", "username profileImageUrl")
-    .sort({ createdAt: -1 });
-  res.json(posts);
+  try {
+    const pageNum = parseInt(page as string, 10) || 1;
+    const limitNum = parseInt(limit as string, 10) || 10;
+    const skip = (pageNum - 1) * limitNum;
+
+    const total = await Post.countDocuments(mongoQuery);
+    
+    const posts = await Post.find(mongoQuery)
+      .populate("userId", "username profileImageUrl")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum);
+      
+    res.json({
+      posts,
+      totalPages: Math.ceil(total / limitNum),
+      currentPage: pageNum,
+      totalPosts: total
+    });
+  } catch (error) {
+    console.error("Pagination error:", error);
+    res.status(500).json({ error: "Failed to fetch posts" });
+  }
 };
 
 export const updatePost = async (req: AuthRequest, res: Response) => {

@@ -26,7 +26,6 @@ export const authenticate = (
     req.userId = payload.userId;
     next();
   } catch (err) {
-    console.error("JWT Verification Error:", err);
     return res.status(401).json({ error: "Invalid token" });
   }
 };

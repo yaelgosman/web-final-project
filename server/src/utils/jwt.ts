@@ -17,6 +17,9 @@ export const verifyRefreshToken = (token: string) =>
   jwt.verify(token, REFRESH_SECRET);
 
 export const saveRefreshToken = async (userId: string, token: string) => {
+  // Optional: clear old tokens for this user to avoid duplicate key issues if same token generated in same second
+  await refreshTokenModel.deleteMany({ userId });
+  
   await refreshTokenModel.create({
     userId: userId,
     token: token,
