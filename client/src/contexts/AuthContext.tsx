@@ -39,7 +39,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 });
             } catch (error) {
                 console.error("Failed to parse user", error);
-                logout(); // אם המידע פגום, ננקה הכל
+                logout(); // if data is corrupted, clear it
             }
         }
     }, []);

@@ -46,7 +46,7 @@ export const smartSearch = async (req: Request, res: Response) => {
         }
 
         const responseText = result.response.text();
-        
+
         // Robust JSON extraction
         let filters;
         try {
@@ -63,9 +63,9 @@ export const smartSearch = async (req: Request, res: Response) => {
             return res.json([]);
         }
 
-        // בניית השאילתה למונגו
+        // building the query for mongo
         const mongoQuery: any = {};
-        
+
         if (filters.city && typeof filters.city === 'string' && filters.city.toLowerCase() !== 'null') {
             mongoQuery["restaurant.city"] = new RegExp(escapeRegExp(filters.city), 'i');
         }
