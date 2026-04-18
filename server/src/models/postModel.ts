@@ -32,7 +32,7 @@ const postSchema = new Schema<IPost>(
     category: {
       type: String,
       required: true,
-      default: 'informal'
+      default: 'italian'
     },
     imagePath: { type: String },
     likesCount: { type: Number, default: 0 },

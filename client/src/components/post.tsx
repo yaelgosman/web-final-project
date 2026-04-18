@@ -10,7 +10,6 @@ import {
   IconButton,
   Divider,
   Paper,
-  Chip,
   Avatar
 } from '@mui/material';
 import likeService from '../services/likeService';
@@ -19,7 +18,6 @@ import likeService from '../services/likeService';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { Favorite } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
-import CircleIcon from '@mui/icons-material/Circle';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import type { PostType } from '../types/post';
 import { getImageUrl } from '../utils/imageUtils';
@@ -148,14 +146,11 @@ const Post: React.FC<PostProps> = ({ post }) => {
           <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
             <Rating value={post.rating} readOnly size="small" sx={{ color: '#00aa6c' }} />
             <Typography variant="body2" sx={{ fontWeight: 800, color: '#333' }}>{post.rating}</Typography>
-            <Typography variant="body2" sx={{ color: '#555', textDecoration: 'underline' }}>
-              ({commentsCount} {commentsCount === 1 ? 'comment' : 'comments'})
-            </Typography>
           </Stack>
 
           <Typography variant="body2" sx={{ color: '#555', mb: 2, display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <RestaurantIcon fontSize="small" sx={{ color: '#888' }} />
-            {post.category && post.category !== 'informal' ? post.category.charAt(0).toUpperCase() + post.category.slice(1) : 'Mediterranean, Middle Eastern'} • $$ - $$$ • {post.restaurant.city}
+            {post.category ? post.category.charAt(0).toUpperCase() + post.category.slice(1).replace('_', ' ') : 'Italian'} • {post.restaurant.city}
           </Typography>
 
           <Divider sx={{ mb: 2 }} />
@@ -183,14 +178,8 @@ const Post: React.FC<PostProps> = ({ post }) => {
               startIcon={<ChatBubbleOutlineIcon />}
               onClick={handleClickOpen}
             >
-              Read Comments
+              Read Comments ({commentsCount})
             </Button>
-            <Chip
-              size="small"
-              label="Open now"
-              icon={<CircleIcon sx={{ fontSize: '10px !important', color: '#00aa6c !important' }} />}
-              sx={{ bgcolor: 'transparent', color: '#00aa6c', fontWeight: 'bold' }}
-            />
           </Stack>
         </Box>
       </Paper>
