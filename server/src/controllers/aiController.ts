@@ -14,11 +14,28 @@ export const smartSearch = async (req: Request, res: Response) => {
         const { query } = req.body;
         const prompt = `
       Extract search filters from this user request: "${query}".
-      Return ONLY a JSON object with keys: "city", "keywords", "minRating".
-      Example 1: "I want spicy pasta in Tel Aviv with at least 4 stars" -> {"city": "Tel Aviv", "keywords": ["spicy pasta", "italian", "noodles"], "minRating": 4}
-      Example 2: "Where can I find some good meat?" -> {"city": null, "keywords": ["meat", "burger", "steak", "bbq", "beef"], "minRating": null}
-      The "keywords" field should be an array of strings representing the main food/restaurant requested, PLUS close synonyms or specific dishes related to it.
-      If a field is missing, use null (or empty array for keywords).
+      Return ONLY a JSON object with keys: "city", "category", "keywords", "minRating", "maxRating", "excludeCities", "excludeKeywords".
+      
+      CRITICAL: "category" must be exactly ONE of these values: ["italian", "asian", "middle_eastern", "street_food", "bakery", "healthy", null]. If the user asks for asian food, set it to "asian". If pizza -> "italian". If bakery -> "bakery". If nothing matches, use null.
+      
+      CRITICAL INSTRUCTIONS FOR RATINGS:
+      - "good", "great", "excellent" means minRating: 4
+      - "bad", "not good", "terrible", "awful" means maxRating: 3
+      If they don't explicitly mention quality or rating, use null.
+
+      Example 1: "I want spicy pasta in Tel Aviv with at least 4 stars" -> {"city": "Tel Aviv", "category": "italian", "keywords": ["spicy pasta", "noodles"], "minRating": 4, "maxRating": null, "excludeCities": [], "excludeKeywords": []}
+      Example 2: "not good asian restaurant" -> {"city": null, "category": "asian", "keywords": [], "minRating": null, "maxRating": 3, "excludeCities": [], "excludeKeywords": []}
+      Example 3: "good restaurants in te aviv" -> {"city": "Tel Aviv", "category": null, "keywords": [], "minRating": 4, "maxRating": null, "excludeCities": [], "excludeKeywords": []}
+      Example 4: "burgers but no cheese" -> {"city": null, "category": "street_food", "keywords": ["burgers", "hamburger"], "minRating": null, "maxRating": null, "excludeCities": [], "excludeKeywords": ["cheese"]}
+      
+      CRITICAL INSTRUCTIONS FOR "keywords":
+      - ONLY include specific food types (e.g., sushi, burger, pizza) or specific restaurant names.
+      - DO NOT include generic adjectives or nouns like "good", "best", "bad", "restaurant", "food", "place", "eat", "asian", "italian". 
+      - DO NOT put cities in keywords.
+      
+      If a location is mentioned, normalize its name (e.g. "tlv" or "te aviv" -> "Tel Aviv", "pt" -> "Petach Tikva") and put it ONLY in the "city" field.
+      The "excludeCities" and "excludeKeywords" fields should capture any locations or terms the user explicitly DOES NOT want.
+      If a field is missing, use null (or empty array).
     `;
 
         let result;
@@ -66,8 +83,20 @@ export const smartSearch = async (req: Request, res: Response) => {
         // building the query for mongo
         const mongoQuery: any = {};
 
-        if (filters.city && typeof filters.city === 'string' && filters.city.toLowerCase() !== 'null') {
-            mongoQuery["restaurant.city"] = new RegExp(escapeRegExp(filters.city), 'i');
+        if (filters.category && typeof filters.category === 'string' && filters.category.toLowerCase() !== 'null') {
+            mongoQuery.category = filters.category;
+        }
+
+        if (filters.city && typeof filters.city === 'string' && filters.city.trim() !== '' && filters.city.toLowerCase() !== 'null') {
+            mongoQuery["restaurant.city"] = { $regex: new RegExp(escapeRegExp(filters.city), 'i') };
+        }
+
+        if (filters.excludeCities && Array.isArray(filters.excludeCities) && filters.excludeCities.length > 0) {
+            const excludeCityRegexes = filters.excludeCities.map((c: string) => new RegExp(escapeRegExp(c), 'i'));
+            mongoQuery["restaurant.city"] = {
+                ...(mongoQuery["restaurant.city"] || {}),
+                $nin: excludeCityRegexes
+            };
         }
 
         if (filters.keywords && Array.isArray(filters.keywords) && filters.keywords.length > 0) {
@@ -78,10 +107,26 @@ export const smartSearch = async (req: Request, res: Response) => {
             ];
         }
 
+        if (filters.excludeKeywords && Array.isArray(filters.excludeKeywords) && filters.excludeKeywords.length > 0) {
+            const excludeRegexes = filters.excludeKeywords.map((kw: string) => new RegExp(escapeRegExp(kw), 'i'));
+            if (!mongoQuery.$and) mongoQuery.$and = [];
+            mongoQuery.$and.push({ "restaurant.name": { $nin: excludeRegexes } });
+            mongoQuery.$and.push({ "text": { $nin: excludeRegexes } });
+        }
+
         if (filters.minRating && filters.minRating !== 'null') {
             const ratingNumber = Number(filters.minRating);
             if (!isNaN(ratingNumber)) {
-                mongoQuery["rating"] = { $gte: ratingNumber };
+                if (!mongoQuery["rating"]) mongoQuery["rating"] = {};
+                mongoQuery["rating"]["$gte"] = ratingNumber;
+            }
+        }
+
+        if (filters.maxRating && filters.maxRating !== 'null') {
+            const maxRatingNumber = Number(filters.maxRating);
+            if (!isNaN(maxRatingNumber)) {
+                if (!mongoQuery["rating"]) mongoQuery["rating"] = {};
+                mongoQuery["rating"]["$lte"] = maxRatingNumber;
             }
         }
 
@@ -89,7 +134,16 @@ export const smartSearch = async (req: Request, res: Response) => {
         const posts = await Post.find(mongoQuery).populate('userId', 'username profileImageUrl');
         res.json(posts);
     } catch (error: any) {
-        console.error("AI Search Error details:", error);
-        res.status(500).json({ error: "AI Search failed" });
+        console.error("AI Search Error details:", error.message || error);
+
+        let statusCode = 500;
+        let errorMessage = "AI Search failed";
+
+        if (error.message && (error.message.includes("429") || error.message.includes("Too Many Requests"))) {
+            statusCode = 429;
+            errorMessage = "Google AI API Rate Limit Reached (429). Please wait or use a new API key.";
+        }
+
+        res.status(statusCode).json({ error: errorMessage });
     }
 };
