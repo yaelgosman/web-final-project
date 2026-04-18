@@ -51,17 +51,26 @@ export const deletePost = async (postId: string): Promise<void> => {
   await apiClient.delete(`${API_URL}/${postId}`);
 };
 
+export interface PaginatedPosts {
+  posts: PostType[];
+  totalPages: number;
+  currentPage: number;
+  totalPosts: number;
+}
+
 /**
- * Fetches all posts from the database, optionally filtered by search text and category.
+ * Fetches all posts from the database, optionally filtered by search text and category and paginated.
  */
-export const getAllPosts = async (search?: string, category?: string): Promise<PostType[]> => {
+export const getAllPosts = async (search?: string, category?: string, page: number = 1, limit: number = 5): Promise<PaginatedPosts> => {
   const params = new URLSearchParams();
   if (search) params.append('search', search);
   if (category && category !== 'all') params.append('category', category);
+  params.append('page', page.toString());
+  params.append('limit', limit.toString());
   
   const queryString = params.toString();
   const url = queryString ? `${API_URL}?${queryString}` : API_URL;
-  const response = await apiClient.get<PostType[]>(url);
+  const response = await apiClient.get<PaginatedPosts>(url);
   return response.data;
 };
 

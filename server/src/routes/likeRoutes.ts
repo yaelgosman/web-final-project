@@ -4,11 +4,11 @@ import {
   unlikePost,
   getLikesByPost,
 } from "../controllers/likeController";
-import { authenticate, optionalAuthenticate } from "../middlewares/authMiddleware";
+import { authenticate } from "../middlewares/authMiddleware";
 
 const router = Router();
 
-router.get("/:postId", optionalAuthenticate, getLikesByPost);
+router.get("/:postId", authenticate, getLikesByPost);
 router.post("/", authenticate, likePost);
 router.delete("/", authenticate, unlikePost);
 

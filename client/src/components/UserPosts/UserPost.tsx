@@ -60,6 +60,7 @@ const UserPost: React.FC<UserPostProps> = ({ post, getImageUrl, onEdit, onDelete
         </span>
         <p style={styles.restaurantName}>{post.restaurant.name}</p>
         <p style={styles.restaurantCity}>{post.restaurant.city}</p>
+        <p style={styles.postDescription}>{post.text}</p>
       </div>
     </div>
   );

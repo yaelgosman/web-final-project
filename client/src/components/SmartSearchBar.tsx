@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Paper, InputBase, IconButton, Divider, Tooltip } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'; // אייקון נצנצים ל-AI
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
 interface SmartSearchBarProps {
     onSearch: (query: string) => void;

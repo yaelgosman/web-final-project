@@ -21,13 +21,14 @@ import { getImageUrl } from '../../utils/imageUtils';
 import * as styles from './CommentSection.style';
 import { CommentType } from '../../types/comment';
 import commentService from '../../services/commentService';
+import { PostType } from '../../types/post';
 
 interface CommentsSectionProps {
-  postId: string;
+  post: PostType;
   onCommentCountChange?: (newCount: number) => void;
 }
 
-const CommentsSection: React.FC<CommentsSectionProps> = ({ postId, onCommentCountChange }) => {
+const CommentsSection: React.FC<CommentsSectionProps> = ({ post, onCommentCountChange }) => {
   const { user } = useAuth();
   const [comments, setComments] = useState<CommentType[]>([]);
   const [commentText, setCommentText] = useState("");
@@ -36,14 +37,14 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId, onCommentCoun
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const data = await commentService.getCommentsByPost(postId);
+        const data = await commentService.getCommentsByPost(post._id);
         setComments(data);
       } catch (error) {
         console.error("Failed to fetch comments:", error);
       }
     };
     fetchComments();
-  }, [postId]);
+  }, [post._id]);
 
   const handleSubmitComment = async () => {
     if (!commentText.trim()) return;
@@ -61,7 +62,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId, onCommentCoun
 
       } else {
         // Create
-        const newComment = await commentService.createComment(postId, commentText);
+        const newComment = await commentService.createComment(post._id, commentText);
         
         // Adds the new comment to the bottom of the list instantly
         const updatedComments = [...comments, newComment];
@@ -106,8 +107,8 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId, onCommentCoun
       <DialogContent dividers sx={styles.dialogContentContent}>
         <List sx={styles.listContainer}>
           {comments.length === 0 ? (
-            <ListItem alignItems="flex-start">
-              <ListItemText primary={<Typography variant="subtitle2" color="text.secondary">No comments yet. Be the first to reply!</Typography>} />
+            <ListItem alignItems="flex-start" sx={{ py: 3, textAlign: 'center' }}>
+              <ListItemText primary={<Typography variant="body2" color="text.secondary" sx={{ width: '100%', textAlign: 'center' }}>No comments yet. Be the first to reply!</Typography>} />
             </ListItem>
           ) : (
             comments.map((comment) => (

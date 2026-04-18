@@ -88,19 +88,31 @@ export const register = async (req: Request, res: Response) => {
 
 
 export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
-  if (!user || !user.password)
-    return res.status(401).json({ error: "Invalid credentials" });
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user || !user.password)
+      return res.status(401).json({ error: "Invalid credentials" });
 
-  const match = await bcrypt.compare(password, user.password);
-  if (!match) return res.status(401).json({ error: "Invalid credentials" });
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(401).json({ error: "Invalid credentials" });
 
-  const accessToken = generateAccessToken(user._id.toString());
-  const refreshToken = generateRefreshToken(user._id.toString());
-  await saveRefreshToken(user._id.toString(), refreshToken);
+    const accessToken = generateAccessToken(user._id.toString());
+    const refreshToken = generateRefreshToken(user._id.toString());
+    await saveRefreshToken(user._id.toString(), refreshToken);
 
-  res.status(201).json({ _id: user._id, username: user.username, email, profileImageUrl: user.profileImageUrl, accessToken, refreshToken });
+    res.status(200).json({ 
+      _id: user._id, 
+      username: user.username, 
+      email, 
+      profileImageUrl: user.profileImageUrl, 
+      accessToken, 
+      refreshToken 
+    });
+  } catch (error: any) {
+    console.error("Login error:", error);
+    res.status(500).json({ error: error.message });
+  }
 };
 
 export const refresh = async (req: Request, res: Response) => {

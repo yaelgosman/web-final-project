@@ -64,3 +64,29 @@ paths:
           description: Unauthorized
         '404':
           description: Like not found
+  /api/likes/status/{postId}:
+    get:
+      summary: Get like status for logged in user on a post
+      tags: [Likes]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isLiked:
+                    type: boolean
+                  likesCount:
+                    type: number
+        '401':
+          description: Unauthorized
