@@ -1,0 +1,27 @@
+paths:
+  /api/ai/search:
+    post:
+      summary: Semantic smart search using AI
+      tags: [AI]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query:
+                  type: string
+                  description: Natural language search query (e.g. "Good meat in Tel Aviv")
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+        "500":
+          description: AI Search failed

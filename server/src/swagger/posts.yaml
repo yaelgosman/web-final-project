@@ -1,0 +1,147 @@
+paths:
+  /api/posts:
+    get:
+      summary: Get all posts (with pagination and filters)
+      tags: [Posts]
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 5
+          description: Posts per page
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search by restaurant name or review text
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Filter by category (e.g. informal, formal, street food)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedPostsResponse"
+    post:
+      summary: Create a post
+      tags: [Posts]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [restaurant, rating, text, category]
+              properties:
+                restaurant:
+                  type: object
+                  required: [name, city]
+                  properties:
+                    name:
+                      type: string
+                    city:
+                      type: string
+                category:
+                  type: string
+                rating:
+                  type: number
+                text:
+                  type: string
+                imagePath:
+                  type: string
+      responses:
+        "201":
+          description: Post created
+        "401":
+          description: Unauthorized
+
+  /api/posts/user/{userId}:
+    get:
+      summary: Get posts by user ID
+      tags: [Posts]
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+
+  /api/posts/{id}:
+    put:
+      summary: Update a post
+      tags: [Posts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                restaurant:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    city:
+                      type: string
+                category:
+                  type: string
+                rating:
+                  type: number
+                text:
+                  type: string
+      responses:
+        "200":
+          description: Post updated
+        "401":
+          description: Unauthorized
+        "404":
+          description: Post not found
+    delete:
+      summary: Delete a post
+      tags: [Posts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Post deleted
+        "401":
+          description: Unauthorized
+        "404":
+          description: Post not found
