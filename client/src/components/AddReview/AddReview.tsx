@@ -32,7 +32,7 @@ const AddReview: React.FC<AddReviewProps> = ({ userId, onPostSuccess, initialDat
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [restaurantName, setRestaurantName] = useState<string>(initialData?.restaurant?.name || '');
   const [restaurantCity, setRestaurantCity] = useState<string>(initialData?.restaurant?.city || '');
-  const [category, setCategory] = useState<string>(initialData?.category || 'informal');
+  const [category, setCategory] = useState<string>(initialData?.category || 'italian');
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -54,8 +54,8 @@ const AddReview: React.FC<AddReviewProps> = ({ userId, onPostSuccess, initialDat
   // If creating a new post, an Image is required, If Editing - the user might have kept the original image
   const isEditing = !!initialData;
 
-  if (!text || !rating || (!isEditing && !image) || !restaurantName || !category) {
-    alert("Please fill out all fields, including restaurant details and an image!");
+  if (!text || !rating || (!isEditing && !image) || !restaurantName || !restaurantCity || !category) {
+    alert("Please fill out all fields, including restaurant details, city, and an image!");
     return;
   }
 
@@ -79,7 +79,7 @@ const AddReview: React.FC<AddReviewProps> = ({ userId, onPostSuccess, initialDat
         // Stringify For nested objects in FormData
         formData.append('restaurant', JSON.stringify({ 
           name: restaurantName, 
-          city: 'Petach Tikva' // For now - ignores the city field // TODO: CHANGE LATER CITY NAME!
+          city: restaurantCity
         }));
 
         await postService.editPost(initialData._id, formData);
@@ -89,7 +89,7 @@ const AddReview: React.FC<AddReviewProps> = ({ userId, onPostSuccess, initialDat
           text,
           rating,
           category,
-          restaurant: {name: restaurantName, city: 'Petach Tikva'} // TODO: CHANGE LATER CITY NAME!
+          restaurant: {name: restaurantName, city: restaurantCity}
         };
 
         await postService.editPost(initialData._id, updateDate);
@@ -106,7 +106,7 @@ const AddReview: React.FC<AddReviewProps> = ({ userId, onPostSuccess, initialDat
     // Stringify For nested objects in FormData
     formData.append('restaurant', JSON.stringify({ 
       name: restaurantName, 
-      city: restaurantCity || 'Petach Tikva'
+      city: restaurantCity
     }));
 
     await postService.createPost(formData);
@@ -118,7 +118,7 @@ const AddReview: React.FC<AddReviewProps> = ({ userId, onPostSuccess, initialDat
     setRating(0);
     setRestaurantName('');
     setRestaurantCity('');
-    setCategory('informal');
+    setCategory('italian');
     removeImage();
   }
     
@@ -180,6 +180,15 @@ const AddReview: React.FC<AddReviewProps> = ({ userId, onPostSuccess, initialDat
           onChange={(e) => setRestaurantName(e.target.value)}
           sx={{ mb: 3 }}
         />  
+
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Which city is it located in? (e.g. Tel Aviv)"
+          value={restaurantCity}
+          onChange={(e) => setRestaurantCity(e.target.value)}
+          sx={{ mb: 3 }}
+        />
 
         <TextField
           fullWidth
