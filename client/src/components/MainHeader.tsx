@@ -4,28 +4,15 @@ import {
     Toolbar,
     Box,
     Typography,
-    Button,
-    InputBase,
     Container,
-    Stack,
     IconButton,
     Avatar,
     Menu,
     MenuItem,
-    Divider,
-    ListItemIcon
+    Divider
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import EditIcon from '@mui/icons-material/Edit'; // For "Review"
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
-import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
-import CookingReviewLogo from './CookingLogo';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import Logout from '@mui/icons-material/Logout';
-import PersonIcon from '@mui/icons-material/Person';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import { VALID_PATHS } from '../constants/paths';
 import { getImageUrl } from '../utils/imageUtils';
 
 const MainHeader: React.FC = () => {

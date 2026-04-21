@@ -2,7 +2,6 @@ import apiClient from './apiClient';
 import { CommentType } from '../types/comment';
 
 const COMMENTS_API_URL = '/api/comments'; 
-const POSTS_API_URL = '/api/posts';
 
 /**
  * Fetches all comments for a specific post.
