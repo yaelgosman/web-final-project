@@ -1,4 +1,3 @@
-import React from 'react';
 import { SvgIcon, type SvgIconProps } from '@mui/material';
 
 const CookingReviewLogo = (props: SvgIconProps) => {
