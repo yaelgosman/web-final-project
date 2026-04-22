@@ -8,5 +8,6 @@ export const getImageUrl = (imagePath?: string) => {
     // Ensure it starts with a slash
     if (!cleanPath.startsWith('/')) cleanPath = `/${cleanPath}`;
 
-    return `http://localhost:3000${cleanPath}`; 
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+    return `${baseUrl}${cleanPath}`; 
   };
