@@ -7,7 +7,7 @@
     "prod1": "cp .envprod .env && tsc -p tsconfig_prod.json && node ./dist/src/server.js",
     "build": "npx tsc",
     "start": "tsc && node dist/server.js",
-    "dev": "nodemon src/server.ts",
+    "dev": "copy .env.dev .env && nodemon src/server.ts",
     "test": "jest --runInBand"
   },
   "keywords": [],
