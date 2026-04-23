@@ -20,10 +20,6 @@ const intApp = () => {
   const promise = new Promise<Express>((resolve, reject) => {
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
-    app.use(express.static(path.join(__dirname, 'client/dist')));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(__dirname, 'client/dist/index.html'));
-    });
     app.use(function (req, res, next) {
       const origin = req.headers.origin || "*";
       res.header("Access-Control-Allow-Origin", origin);
@@ -45,6 +41,16 @@ const intApp = () => {
     app.use("/api/likes", likeRoutes);
     app.use("/api/ai", aiRoutes);
     app.use("/upload", uploadRoutes);
+
+    // Serve static files from the React app (client/dist)
+    // We use process.cwd() to ensure it works regardless of where the file is compiled
+    const clientPath = path.join(process.cwd(), "..", "client", "dist");
+    app.use(express.static(clientPath));
+
+    // The catch-all handler: for any request that doesn't match one above, send back React's index.html file.
+    app.get("*", (req, res) => {
+      res.sendFile(path.join(clientPath, "index.html"));
+    });
 
     const dbUri = process.env.MONGODB_URI;
     if (!dbUri) {
