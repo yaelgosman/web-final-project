@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const apiClient = axios.create({
     // Retrieves the backend URL from the .env file, or falls back to localhost for development
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
+    baseURL: import.meta.env.VITE_API_BASE_URL || window.location.origin,
     // headers: {
     //     'Content-Type': 'application/json',
     // },
@@ -80,7 +80,7 @@ apiClient.interceptors.response.use(
 
                 // update the header and retry the original request
                 originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-                
+
                 processQueue(null, accessToken);
                 return apiClient(originalRequest);
             } catch (refreshError) {
