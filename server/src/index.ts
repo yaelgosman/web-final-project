@@ -1,6 +1,7 @@
 import express, { Express } from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import path from "path";
 dotenv.config(); // Or dotenv.config({ path: ".env.dev" }) if preferred, but .env is standard
 
 import authRoutes from "./routes/authRoutes";
@@ -19,12 +20,17 @@ const intApp = () => {
   const promise = new Promise<Express>((resolve, reject) => {
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
+    app.use(express.static(path.join(__dirname, 'client/dist')));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(__dirname, 'client/dist/index.html'));
+    });
     app.use(function (req, res, next) {
       const origin = req.headers.origin || "*";
       res.header("Access-Control-Allow-Origin", origin);
       res.header("Access-Control-Allow-Headers", "*");
       res.header("Access-Control-Allow-Methods", "*");
       res.header("Access-Control-Allow-Credentials", "true");
+
       next();
     });
 
