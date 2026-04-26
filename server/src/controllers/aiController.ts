@@ -9,9 +9,21 @@ const escapeRegExp = (string: string) => {
     return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 };
 
+// Simple in-memory cache to save API rate limits (Free tier is 15 RPM)
+const queryCache = new Map<string, any>();
+
 export const smartSearch = async (req: Request, res: Response) => {
     try {
         const { query } = req.body;
+        const normalizedQuery = query.trim().toLowerCase();
+
+        if (queryCache.has(normalizedQuery)) {
+            console.log("Using cached AI result for:", normalizedQuery);
+            const mongoQuery = queryCache.get(normalizedQuery);
+            const posts = await Post.find(mongoQuery).populate('userId', 'username profileImageUrl');
+            return res.json(posts);
+        }
+
         const prompt = `
       Extract search filters from this user request: "${query}".
       Return ONLY a JSON object with keys: "city", "category", "keywords", "minRating", "maxRating", "excludeCities", "excludeKeywords".
@@ -40,12 +52,16 @@ export const smartSearch = async (req: Request, res: Response) => {
 
         let result;
         try {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); //TODO: gemini-flash-latest is in the vm
             result = await model.generateContent(prompt);
-        } catch (e) {
-            console.warn("gemini-1.5-flash failed, trying fallback models...");
+        } catch (e: any) {
+            if (e.status === 429 || (e.message && (e.message.includes('429') || e.message.includes('Too Many Requests')))) {
+                throw e; // Immediate re-throw on rate limit to avoid rate-limiting fallbacks 
+            }
+            console.warn(`gemini-1.5-flash failed (${e.message || 'unknown error'}), trying fallback models...`);
             const modelNames = ["gemini-flash-latest", "gemini-2.0-flash", "gemini-pro-latest"];
             let fallbackAttempted = false;
+            let lastError = e;
             for (const modelName of modelNames) {
                 try {
                     const model = genAI.getGenerativeModel({ model: modelName });
@@ -53,12 +69,16 @@ export const smartSearch = async (req: Request, res: Response) => {
                     fallbackAttempted = true;
                     console.warn(`Successfully used fallback model: ${modelName}`);
                     break; // Exit loop if successful
-                } catch (fallbackError) {
-                    console.warn(`${modelName} failed:`, fallbackError);
+                } catch (fallbackError: any) {
+                    console.warn(`${modelName} failed:`, fallbackError?.message || fallbackError);
+                    lastError = fallbackError;
+                    if (fallbackError.status === 429 || (fallbackError.message && (fallbackError.message.includes('429') || fallbackError.message.includes('Too Many Requests')))) {
+                        throw fallbackError; // Immediate re-throw on rate limit
+                    }
                 }
             }
             if (!fallbackAttempted || !result) {
-                throw new Error("All AI models failed to generate content.");
+                throw lastError; // Throw the actual error so the outer catch can see 429 status
             }
         }
 
@@ -131,6 +151,14 @@ export const smartSearch = async (req: Request, res: Response) => {
         }
 
         console.log("Mongo Query:", JSON.stringify(mongoQuery, null, 2));
+
+        // Cache the result to save API requests
+        queryCache.set(normalizedQuery, mongoQuery);
+        // clear cache if too big
+        if (queryCache.size > 500) {
+            queryCache.clear();
+        }
+
         const posts = await Post.find(mongoQuery).populate('userId', 'username profileImageUrl');
         res.json(posts);
     } catch (error: any) {
