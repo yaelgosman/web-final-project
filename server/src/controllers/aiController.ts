@@ -162,7 +162,8 @@ export const smartSearch = async (req: Request, res: Response) => {
         const posts = await Post.find(mongoQuery).populate('userId', 'username profileImageUrl');
         res.json(posts);
     } catch (error: any) {
-        console.error("AI Search Error details:", error.message || error);
+        // console.error("AI Search Error details:", error.message || error);
+        console.error(`${Date.now()} | AI Search Error details:`, error.message || error);
 
         let statusCode = 500;
         let errorMessage = "AI Search failed";
